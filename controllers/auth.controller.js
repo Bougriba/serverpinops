@@ -118,7 +118,7 @@ const login = async function (req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      errorMessage: error.message,
+      errorMessage: "server error",
     });
   }
 };
@@ -129,7 +129,14 @@ const register = async function register(req, res) {
       
       email,
       password,
-     role
+      // age,
+      // phoneNumber,
+      // image,
+      role,
+      // company,
+      // skills,
+      // degrees,
+      // majors,
     }  = req.body;
     const userExists = await User.findOne({ where: { email } });
     if (userExists) {
@@ -187,9 +194,12 @@ const register = async function register(req, res) {
         
         email,
         password: hashedPassword,
+        // age,
+        // phoneNumber,
+        // image,
         role,
       });
-    
+    // }
 
     return res.status(201).json({
       success: true,
@@ -198,7 +208,7 @@ const register = async function register(req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      errorMessage: error.message,
+      errorMessage: 'Server error',
     });
   }
 };

@@ -27,7 +27,7 @@ const Job_seeker = sequelize.define(
   { freezeTableName: true, timestamps: true }
 );
 
-Job_seeker.hasMany(Candidats, {foreignKey: "idJobseeker"});
-Candidats.belongsTo(Job_seeker , {foreignKey: "idJobseeker"});
+// Job_seeker.hasMany(Candidats, {foreignKey: "idJobseeker"});
+// Candidats.belongsTo(Job_seeker , {foreignKey: "idJobseeker"});
 
 module.exports = Job_seeker;

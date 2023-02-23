@@ -17,7 +17,7 @@ const roleMiddleware = async (req, res, next) => {
     const role = decodedToken.role;
 
     //if (role !== 'admin' && role !== 'superadmin' && role !== 'recruiter') {
-    if (role !== 'admin' && role !== 'superadmin' && role !== 'recruiter') {
+    if (role !== 'admin' && role !== 'superadmin' && role !== 'job_seeker') {
       return res.status(403).json({
         success: false,
         message: "Forbidden",

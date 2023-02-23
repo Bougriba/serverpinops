@@ -12,7 +12,7 @@ const Candidats = sequelize.define(
     primaryKey: true,
     onDelete: 'CASCADE',
   },
-    idJobseeker: {
+    idUser: {
     type: DataTypes.INTEGER,
     allowNull: false,
     primaryKey:true ,
