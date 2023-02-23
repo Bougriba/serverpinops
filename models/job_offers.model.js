@@ -12,7 +12,7 @@ const job_offer = sequelize.define(
     // primaryKey: true,
     // autoIncrement : true
     // },
-    recruiterId: {
+    idUser: {
       type: DataTypes.INTEGER,
       allowNull: false,
       onDelete: "CASCADE",
@@ -36,6 +36,7 @@ const job_offer = sequelize.define(
   },
   { freezeTableName: true, timestamps: true }
 );
+
 job_offer.hasMany(Candidats, { foreignKey: "idJob" });
 Candidats.belongsTo(job_offer, { foreignKey: "idJob" });
 

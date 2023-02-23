@@ -118,7 +118,7 @@ const login = async function (req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      errorMessage: error.message,
+      errorMessage: "server error",
     });
   }
 };
@@ -129,14 +129,14 @@ const register = async function register(req, res) {
       fullName,
       email,
       password,
-      age,
-      phoneNumber,
-      image,
+      // age,
+      // phoneNumber,
+      // image,
       role,
-      company,
-      skills,
-      degrees,
-      majors,
+      // company,
+      // skills,
+      // degrees,
+      // majors,
     }  = req.body;
     const userExists = await User.findOne({ where: { email } });
     if (userExists) {
@@ -151,55 +151,55 @@ const register = async function register(req, res) {
     console.log(password, hashedPassword);
     let user;
 
-    if (role === "recruiter") {
-      user = await User.create(
-        {
-          fullName,
-          email,
-          password: hashedPassword,
-          age,
-          phoneNumber,
-          image,
-          role,
-          Recruiter: {
-            company,
-          },
-        },
-        {
-          include: [Recruiter],
-        }
-      );
-    } else if (role === "job_seeker") {
-      user = await User.create(
-        {
-          fullName,
-          email,
-          password: hashedPassword,
-          age,
-          phoneNumber,
-          image,
-          role,
-          Job_seeker: {
-            skills: skills,
-            degrees: degrees,
-            majors: majors,
-          },
-        },
-        {
-          include: [Job_seeker],
-        }
-      );
-    } else {
+    // if (role === "recruiter") {
+    //   user = await User.create(
+    //     {
+    //       fullName,
+    //       email,
+    //       password: hashedPassword,
+    //       age,
+    //       phoneNumber,
+    //       image,
+    //       role,
+    //       Recruiter: {
+    //         company,
+    //       },
+    //     },
+    //     {
+    //       include: [Recruiter],
+    //     }
+    //   );
+    // } else if (role === "job_seeker") {
+    //   user = await User.create(
+    //     {
+    //       fullName,
+    //       email,
+    //       password: hashedPassword,
+    //       age,
+    //       phoneNumber,
+    //       image,
+    //       role,
+    //       Job_seeker: {
+    //         skills: skills,
+    //         degrees: degrees,
+    //         majors: majors,
+    //       },
+    //     },
+    //     {
+    //       include: [Job_seeker],
+    //     }
+    //   );
+    // } else {
       user = await User.create({
         fullName,
         email,
         password: hashedPassword,
-        age,
-        phoneNumber,
-        image,
+        // age,
+        // phoneNumber,
+        // image,
         role,
       });
-    }
+    // }
 
     return res.status(201).json({
       success: true,
@@ -208,7 +208,7 @@ const register = async function register(req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      errorMessage: error.message,
+      errorMessage: 'Server error',
     });
   }
 };

@@ -3,11 +3,12 @@ const job_offer = require("../models/job_offers.model");
 const CreateJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
-    const recruiterId = req.user.userId;
+    const idUser = req.user.userId;
+    //console.log(req.user);
     const { title, description, location, salary } = req.body;
     // Create new job with recruiter id
     const job = await job_offer.create({
-      recruiterId: recruiterId,
+      idUser: idUser,
       title,
       job_description: description,
       location,
@@ -27,10 +28,11 @@ const CreateJob = async (req, res) => {
 const getAllJobs = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
-    const recruiterId = req.user.userId;
+    const idUser = req.user.userId;
+    console.log(req.user);
     // Find all jobs for recruiter id
     const jobs = await job_offer.findAll({
-      where: { recruiter_id: recruiterId },
+      where: { idUser: idUser },
     });
 
     res.status(200).json({
@@ -46,11 +48,11 @@ const getAllJobs = async (req, res) => {
 const getJobById = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
-    const recruiterId = req.user.userId;
+    const idUser = req.user.userId;
 
     // Find job by id and recruiter id
     const job = await job_offer.findOne({
-      where: { id: req.params.id, recruiter_id: recruiterId },
+      where: { id: req.params.id, idUser: idUser },
     });
 
     if (!job) {
@@ -59,7 +61,8 @@ const getJobById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "job deleted Successfully",
+      message :"ALL godd",
+      data:job,
     });
   } catch (err) {
     console.error(err);
@@ -69,11 +72,11 @@ const getJobById = async (req, res) => {
 const updateJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
-    const recruiterId = req.user.userId;
+    const idUser = req.user.userId;
 
     // Find job by id and recruiter id
     const job = await job_offer.findOne({
-      where: { id: req.params.id, recruiter_id: recruiterId },
+      where: { id: req.params.id, idUser: idUser },
     });
 
     if (!job) {
@@ -100,11 +103,11 @@ const updateJob = async (req, res) => {
 const deleteJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
-    const recruiterId = req.user.userId;
+    const idUser = req.user.userId;
 
     // Find job by id and recruiter id
     const job = await job_offer.findOne({
-      where: { id: req.params.id, recruiter_id: recruiterId },
+      where: { id: req.params.id, idUser: idUser },
     });
 
     if (!job) {

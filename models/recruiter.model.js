@@ -18,8 +18,8 @@ const Recruiter = sequelize.define(
   },
   { freezeTableName: true, timestamps: true }
 );
-Recruiter.hasMany(job_offer, {foreignKey : "recruiterId"});
-job_offer.belongsTo(Recruiter , {foreignKey : "recruiterId"});
+// Recruiter.hasMany(job_offer, {foreignKey : "recruiterId"});
+// job_offer.belongsTo(Recruiter , {foreignKey : "recruiterId"});
 
 
 module.exports = Recruiter;

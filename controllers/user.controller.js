@@ -1,6 +1,8 @@
 const User = require("../models/user.model");
 const Recruiter = require("../models/recruiter.model");
 const Job_seeker = require("../models/job_seeker.model");
+const bcrypt = require("bcrypt");
+const { hash } = require("bcrypt");
 
 module.exports.createUser = async (req, res) => {
   const {
@@ -26,12 +28,14 @@ module.exports.createUser = async (req, res) => {
     }
 
     let newUser;
+    const genSalt = await bcrypt.genSalt(10);
+     const hashedPassword = await bcrypt.hash(password, genSalt);
     if (role == "recruiter") {
       newUser = await User.create(
         {
           fullName,
           email,
-          password,
+          password: hashedPassword,
           age,
           phoneNumber,
           image,
@@ -49,7 +53,7 @@ module.exports.createUser = async (req, res) => {
         {
           fullName,
           email,
-          password,
+          password : hashedPassword,
           age,
           phoneNumber,
           image,
@@ -68,7 +72,7 @@ module.exports.createUser = async (req, res) => {
       newUser = await User.create({
         fullName,
         email,
-        password,
+        password : hashedPassword,
         age,
         phoneNumber,
         image,
@@ -83,7 +87,7 @@ module.exports.createUser = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      errorMessage: `Server error`,
+      errorMessage: err.message,
     });
   }
 };
@@ -257,9 +261,10 @@ module.exports.updateUser = async (req, res) => {
         .status(404)
         .json({ success: false, errorMessage: "User not found" });
     }
-
+    // const genSalt = await bcrypt.genSalt(10);
+    // const hashedPassword = await bcrypt.hash(password, genSalt);
     const updatedUser = await user.update(
-      { fullName, password, age, phoneNumber },
+      { fullName, password, age , phoneNumber , image , email},
       { where: { email: email } }
     );
 
@@ -293,7 +298,7 @@ module.exports.updateUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      errorMessage: "Server error",
+      errorMessage: error.message,
     });
   }
 };

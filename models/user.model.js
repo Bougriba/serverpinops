@@ -1,6 +1,8 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 const Recruiter = require("./recruiter.model");
+const job_offer = require("./job_offers.model");
+const candidats = require("./candidats.model");
 const Job_seeker=require("./job_seeker.model")
 const User = sequelize.define(
   "User",
@@ -66,5 +68,11 @@ Recruiter.belongsTo(User, { foreignKey: "idUser" });
 //association user - job_seeker
 User.hasOne(Job_seeker, { foreignKey: "idUser" });
 Job_seeker.belongsTo(User, { foreignKey: "idUser" });
+
+User.hasMany(job_offer, { foreignKey: "idUser" });
+job_offer.belongsTo(User, { foreignKey: "idUser" });
+
+User.hasMany(candidats, { foreignKey: "idUser" });
+candidats.belongsTo(User, { foreignKey: "idUser" });
 
 module.exports = User;
