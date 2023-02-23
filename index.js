@@ -1,6 +1,9 @@
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
+const cors = require('cors');
+app.use(cors());
+
 require("dotenv").config();
 
 const userRoutes = require("./routes/user.route");
@@ -14,6 +17,9 @@ if (process.env.NODE_ENV === "development") {
 app.use("/api/jobs", job_offerRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use(cors({
+  origin: 'http://localhost:3001',
+}));
 
 const port = process.env.PORT || 8000;
 app.listen(port, () => {
