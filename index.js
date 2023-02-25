@@ -23,7 +23,7 @@ app.use(cors({
   origin: 'http://localhost:3001',
 }));
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8002;
 app.listen(port, () => {
   console.log("Server is working" + port);
 });

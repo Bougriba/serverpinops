@@ -89,7 +89,7 @@ const login = async function (req, res) {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid email or password 1",
+        message: "Invalid email or password",
       });
     }
 
@@ -106,10 +106,9 @@ const login = async function (req, res) {
       { userId: user.id, fullName: user.fullName, role: user.role },
       process.env.PASSWORD_HASH_TOKEN,
       {
-        expiresIn: "1d",
+        expiresIn: "2d",
       }
     );
-
     return res.status(200).json({
       success: true,
       message: "Successfully logged in",
@@ -126,7 +125,7 @@ const login = async function (req, res) {
 const register = async function register(req, res) {
   try {
     const {
-      
+      fullName,
       email,
       password,
       // age,
@@ -191,7 +190,7 @@ const register = async function register(req, res) {
     //   );
     // } else {
       user = await User.create({
-        
+        fullName,
         email,
         password: hashedPassword,
         // age,

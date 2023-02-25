@@ -28,7 +28,7 @@ function Register() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = { fullName, email, password, role };
-    Axios.post('http://localhost:8000/api/auth/register', data)
+    Axios.post('http://localhost:8002/api/auth/register', data)
       .then(response => {
         console.log(response);
       })
