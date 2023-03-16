@@ -13,7 +13,7 @@ const Recruiter = sequelize.define(
     },
     company: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
   },
   { freezeTableName: true, timestamps: true }

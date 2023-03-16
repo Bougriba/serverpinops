@@ -33,6 +33,16 @@ const job_offer = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    tags: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+    },
+    verified:
+    {
+      type: DataTypes.BOOLEAN,
+      allowNull : true,
+      defaultvalue : false ,
+    }
   },
   { freezeTableName: true, timestamps: true }
 );
