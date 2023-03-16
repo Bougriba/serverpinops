@@ -86,7 +86,7 @@ function Register() {
         <label className='form-check-label' htmlFor='option1'>Job Seeker</label> 
       </div>
       <div className='form-check'>
-        <input className='form-check-input' type='radio' name='flexRadioDefault' id='option2' value={Recruiter} checked={role === 'Recruiter'} onChange={() => setRole('Recruiter')} />
+        <input className='form-check-input' type='radio' name='flexRadioDefault' id='option2' value={Recruiter} checked={role === 'recruiter'} onChange={() => setRole('recruiter')} />
         <label className='form-check-label' htmlFor='option1'>Recruiter</label> 
       </div>
       {selectedOption === 'option1' &&

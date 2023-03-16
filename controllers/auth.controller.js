@@ -102,17 +102,17 @@ const login = async function (req, res) {
       });
     }
 
-    const token = jwt.sign(
-      { userId: user.id, fullName: user.fullName, role: user.role },
-      process.env.PASSWORD_HASH_TOKEN,
-      {
-        expiresIn: "2d",
-      }
-    );
+    // const token = jwt.sign(
+    //   { userId: user.id, fullName: user.fullName, role: user.role,  },
+    //   process.env.PASSWORD_HASH_TOKEN,
+    //   {
+    //     expiresIn: "1d",
+    //   }
+    // );
     return res.status(200).json({
       success: true,
       message: "Successfully logged in",
-      token: "Bearer " + token,
+      
     });
   } catch (error) {
     return res.status(500).json({
@@ -205,6 +205,7 @@ const register = async function register(req, res) {
       message: "Successfully registered",
     });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({
       success: false,
       errorMessage: 'Server error',
