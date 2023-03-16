@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const fs = require('fs');
 module.exports.uploadImageyourself = async (req, res) => {
   try {
+    console.log(req.user.userId);
     const { mimetype, originalname, buffer } = req.file;
     const user = await User.findOne({
       where: { id: req.user.userId },
