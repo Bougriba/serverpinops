@@ -11,3 +11,18 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.job-block {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.job-label {
+  font-weight: bold;
+  margin-right: 0.5rem;
+  width: 8rem;
+}
+
+.job {
+  margin-bottom: 0.5rem;
+}

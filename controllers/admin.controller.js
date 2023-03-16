@@ -1,26 +1,28 @@
 const User = require("../models/user.model");
 const Recruiter = require("../models/recruiter.model");
 const Job_seeker = require("../models/job_seeker.model");
+const Candidats = require("../models/candidats.model");
 const bcrypt = require("bcrypt");
-const fs = require('fs');
-module.exports.uploadImageyourself = async (req, res) => {
+const fs = require("fs");
+const job_offer = require("../models/job_offers.model");
+module.exports.uploadImage = async (req, res) => {
   try {
-    console.log(req.user.userId);
+    const { id } = req.params;
     const { mimetype, originalname, buffer } = req.file;
     const user = await User.findOne({
-      where: { id: req.user.userId },
+      where: { id },
     });
 
     if (!user) {
       return res
-        
+
         .status(404)
-        .json({ success: false, errorMessage: "User not found" });
+        .json({ success: false, Message: "User Not found" });
     }
 
     const updatedUser = await user.update(
       { imageData: buffer, imageType: mimetype, imageName: originalname },
-      { where: { id: req.user.userId } }
+      { where: { id } }
     );
 
     return res.status(200).json({
@@ -30,43 +32,7 @@ module.exports.uploadImageyourself = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
-    });
-  }
-};
-
-module.exports.uploadPdf = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, errorMessage: "No file uploaded" });
-    }
-    const { mimetype, originalname, buffer } = req.file;
-    const user = await Job_seeker.findOne({
-      where: { idUser: req.user.userId },
-    });
-
-    if (!user) {
-      return res
-        
-        .status(404)
-        .json({ success: false, errorMessage: "User not found" });
-    }
-
-    const updatejobseeker = await user.update(
-      { pdfdata: buffer , pdfName:originalname , pdfType:mimetype},
-      { where: { idUser: req.user.userId } }
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: "pdf uploaded",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
+      message:"azerazerazer",
     });
   }
 };
@@ -85,7 +51,6 @@ module.exports.createUser = async (req, res) => {
     majors,
     genre,
   } = req.body;
-  
   let imageData, imageType, imageName;
   if (req.file) {
     const { mimetype, originalname, buffer } = req.file;
@@ -98,7 +63,7 @@ module.exports.createUser = async (req, res) => {
     imageType = "image/png"; // Set the default image type
     imageName = "default.png"; // Set the default image name
   }
-  
+
   try {
     const user = await User.findOne({ where: { email } });
 
@@ -117,7 +82,9 @@ module.exports.createUser = async (req, res) => {
           password: hashedPassword,
           age,
           phoneNumber,
-          imageData, imageType, imageName,
+          imageData,
+          imageType,
+          imageName,
           role,
           genre,
           Recruiter: {
@@ -136,7 +103,9 @@ module.exports.createUser = async (req, res) => {
           password: hashedPassword,
           age,
           phoneNumber,
-          imageData, imageType, imageName,
+          imageData,
+          imageType,
+          imageName,
           role,
           genre,
           Job_seeker: {
@@ -150,15 +119,9 @@ module.exports.createUser = async (req, res) => {
         }
       );
     } else {
-      newUser = await User.create({
-        fullName,
-        email,
-        password: hashedPassword,
-        age,
-        phoneNumber,
-        imageData, imageType, imageName,
-        role,
-        genre
+      return res.status(405).json({
+        success: false,
+        message: "YOU DO NOT HAVE THE PRIVILIGE",
       });
     }
 
@@ -297,7 +260,12 @@ module.exports.deleteUser = async (req, res) => {
         errorMessage: "User not found",
       });
     }
-
+    if (user.role === "admin" || user.role === "superadmin") {
+      return res.status(405).json({
+        success: false,
+        errorMessage: "YOU DO NOT HAVE THE PRIVILIGE",
+      });
+    }
     await user.destroy();
     return res.status(200).json({
       success: true,
@@ -325,15 +293,20 @@ module.exports.updateUser = async (req, res) => {
       skills,
       degrees,
       majors,
-      genre,
+      genre, 
     } = req.body;
     let imageData, imageType, imageName;
-  if (req.file) {
-    const { mimetype, originalname, buffer } = req.file;
-    imageData = buffer;
-    imageType = mimetype;
-    imageName = originalname;
-  }
+    if (req.file) {
+      const { mimetype, originalname, buffer } = req.file;
+      imageData = buffer;
+      imageType = mimetype;
+      imageName = originalname;
+    } else {
+      const defaultImage = fs.readFileSync("public/images/defaultimage.png");
+      imageData = defaultImage;
+      imageType = "image/png"; // Set the default image type
+      imageName = "default.png"; // Set the default image name
+    }
     const user = await User.findOne({
       where: { id },
       include: [
@@ -353,23 +326,49 @@ module.exports.updateUser = async (req, res) => {
         .status(404)
         .json({ success: false, errorMessage: "User not found" });
     }
-    let updatedUser;
+    if (user.role == "admin" || user.role === "superadmin") {
+      return res.status(400).json({
+        success: false,
+        errorMessage: "YOU DO NOT HAVE THE PRIVILIGE",
+      });
+    }
+    let updatedUser
     if (password != null) {
       const genSalt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, genSalt);
-       updatedUser = await user.update(
-        { fullName, password: hashedPassword, age, phoneNumber, email, imageData, imageType, imageName, genre:genre },
-        { where: { id:id } }
+     updatedUser = await user.update(
+        {
+          fullName,
+          password: hashedPassword,
+          age,
+          phoneNumber,
+          email,
+          imageData,
+          imageType,
+          imageName,
+          genre,
+        },
+        { where: { id:id} }
       );
     }
     else
     {
-       updatedUser = await user.update(
-        { fullName, age, phoneNumber, email, imageData, imageType, imageName, genre:genre },
-        { where: { id:id } }
+      updatedUser = await user.update(
+        {
+          fullName,
+          age,
+          phoneNumber,
+          email,
+          imageData,
+          imageType,
+          imageName,
+          genre,
+        },
+        { where: { id:id} }
       );
-      }
-    
+    }
+  
+   
 
     if (updatedUser.Recruiter) {
       await updatedUser.Recruiter.update({ company: company });
@@ -380,7 +379,6 @@ module.exports.updateUser = async (req, res) => {
         majors: majors,
       });
     }
-
     const modifiedUser = { ...updatedUser.toJSON() };
     if (!modifiedUser.Recruiter) {
       delete modifiedUser.Recruiter;
@@ -394,14 +392,201 @@ module.exports.updateUser = async (req, res) => {
     }
     delete modifiedUser["Recruiter.idUser"];
     delete modifiedUser["Job_seeker.idUser"];
+
     return res.status(200).json({
       success: true,
       data: modifiedUser,
+      message:"User Updated Suces"
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       errorMessage: error.message,
     });
+  }
+};
+
+module.exports.getAllJobsbyRecuriter = async (req, res) => {
+  try {
+    // Get recruiter id from authenticated user
+    const { id } = req.params;
+    //console.log(req.user);
+    // Find all jobs for recruiter id
+    const jobs = await job_offer.findAll({
+      where: { idUser:id },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Working Successfully",
+      data: jobs,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+module.exports.getAlldataJobs = async (req, res) => {
+  try {
+    // Find all jobs for recruiter id
+    const jobs = await job_offer.findAll();
+
+    res.status(200).json({
+      success: true,
+      message: "Working Successfully",
+      data: jobs,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports.deleteJobbyRecruiter = async (req, res) => {
+  try {
+    const idjob = req.params.Job_id;
+
+    // Find job by id and recruiter id
+    const job = await job_offer.findOne({
+      where: { id: idjob },
+    });
+
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    // Delete job
+    await job.destroy();
+    res.status(204).json({
+      message: "Job deleted",
+      success:true ,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+module.exports.updateJobbyRecruiter = async (req, res) => {
+  try {
+    const { location, title, skills, degrees, majors, salary, tags } = req.body;
+    // Get recruiter id from authenticated user
+    const idjob = req.params.Job_id;
+
+    // Find job by id and recruiter id
+    const job = await job_offer.findOne({
+      where: { id: idjob },
+    });
+
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    // Update job
+    const updatejob = await job_offer.update(
+      { location, title, skills, degrees, majors, salary, tags },
+      { where: { id: idjob } }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Job updated Successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports.getCandidatById = async (req, res) => {
+  try {
+    idJob= req.params.Job_id;
+    idUser= req.params.userId;
+    const candidat = await Candidats.findOne({
+      where: {
+        idJob:idJob,
+        idUser:idUser,
+      },
+      include: [job_offer],
+    });
+    
+    
+    if (!candidat) {
+      return res.status(404).json({ message: "Candidat not found" });
+    }
+
+    return res.status(200).json({ candidat });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.getAllCandidatsbyApplier = async (req, res) => {
+  const applier_id = req.params.userId;
+  try {
+    const candidats = await Candidats.findAll({
+      where: {
+        idUser: applier_id,
+      },
+      include: [job_offer],
+    });
+    return res.status(200).json({ candidats });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.getAllCandidats = async (req, res) => {
+  try {
+    const candidats = await Candidats.findAll({
+      include: [job_offer],
+    });
+    return res.status(200).json({ candidats });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.deleteCandidat = async (req, res) => {
+  try {
+    idUser= req.params.userId;
+    const job_id = req.params.Job_id;
+console.log(idUser)
+    // Check if candidate exists
+    const existingCandidate = await Candidats.findOne({
+      where: { idJob: job_id, idUser: idUser },
+    });
+    if (!existingCandidate) {
+      return res.status(404).json({ message: "Candidate not found" });
+    }
+
+    // Delete candidate
+    await existingCandidate.destroy();
+
+    return res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+module.exports.verifier = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const job = job_offer.findOne({ where: { id } });
+    if (!job)
+      res.status(400).json({
+        message: "Not Found",
+      });
+
+    await job_offer.update({ verified: true }, { where: { id: id } });
+    return res.status(200).json({
+      success: true,
+      message: "Job Verified",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };

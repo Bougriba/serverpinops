@@ -53,7 +53,7 @@ const getCandidatById = async (req, res) => {
 };
 
 const getAllCandidats = async (req, res) => {
-    const applier_id = req.user.userId;
+  const applier_id = req.user.userId;
     try {
         const candidats = await Candidats.findAll(
             {

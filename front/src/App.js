@@ -9,10 +9,10 @@ import OneJob from './components/OneJob.jsx';
 function App() {
   const [jobs, setJobs] = useState([]);
   useEffect(() => {
-    const data = axios.get("http://localhost:8002/api/jobs")
+    const data = axios.get("http://localhost:8002/api/jobs/")
       .then(response => {
         setJobs(response.data);
-        console.log(data);
+        // console.log(data);
       })
       .catch(error => {
         console.error(error);

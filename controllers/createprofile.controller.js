@@ -29,14 +29,17 @@ const CreateProfile = async (req, res) => {
                 .status(404)
                 .json({ success: false, errorMessage: "User not found" });
         };
-        if (req.user.role === "job_seeker") {
-            const updatejob_seeker = await Job_seeker.update(
-                { comapny: company },
-                { where: { idUser: userid } }
-            );
+        if (req.user.role === "recruiter") {
+            const job_seeker = await job_seeker.findOne({
+                where: { id:userid },
+            });
+            job_seeker.skills = skills; 
+            job_seeker.degrees = degrees;
+            job_seeker.majors = majors;
+            await job_seeker.save();
         }
         else {
-            const updateRecruiter = await Recruiter.update(
+            const updateRecruiter = await Job_seeker.update(
                 { skills: skills, degrees: degrees, majors: majors },
                 { where: { idUser: userid } }
             );
@@ -53,3 +56,4 @@ const CreateProfile = async (req, res) => {
     
         
 }
+module.exports = { CreateProfile };

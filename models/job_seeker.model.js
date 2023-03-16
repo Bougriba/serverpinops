@@ -13,16 +13,29 @@ const Job_seeker = sequelize.define(
     },
     skills: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
+      allowNull: true,
     },
     degrees: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
+      allowNull: true,
     },
     majors: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull : false
+      allowNull : true
     },
+    pdfdata: {
+      type: DataTypes.BLOB('long'),
+      allowNull: true,
+    },
+    pdfName: {
+      type: DataTypes.STRING, 
+      allowNull:true,
+    },
+    pdfType:
+    {
+      type: DataTypes.STRING,
+      allowNull: true,
+    }
   },
   { freezeTableName: true, timestamps: true }
 );

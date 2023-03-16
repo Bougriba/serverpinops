@@ -1,18 +1,22 @@
 const Recruiter = require("../models/recruiter.model");
 const job_offer = require("../models/job_offers.model");
+const { Op } = require("sequelize");
 const CreateJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
     const idUser = req.user.userId;
     //console.log(req.user);
-    const { title, description, location, salary } = req.body;
+    const { title, job_description, location, salary, tags } = req.body;
+    console.log(job_description)
     // Create new job with recruiter id
     const job = await job_offer.create({
       idUser: idUser,
       title,
-      job_description: description,
+      job_description: job_description,
       location,
       salary,
+      tags,
+      verified : false ,
     });
 
     res.status(201).json({
@@ -29,7 +33,7 @@ const getAllJobs = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
     const idUser = req.user.userId;
-    console.log(req.user);
+    
     // Find all jobs for recruiter id
     const jobs = await job_offer.findAll({
       where: { idUser: idUser },
@@ -73,7 +77,7 @@ const updateJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
     const idUser = req.user.userId;
-
+    const { location, title, skills, degrees, majors, salary, tags } = req.body;
     // Find job by id and recruiter id
     const job = await job_offer.findOne({
       where: { id: req.params.id, idUser: idUser },
@@ -83,12 +87,10 @@ const updateJob = async (req, res) => {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    // Update job
-    job.title = req.body.title;
-    job.description = req.body.description;
-    job.location = req.body.location;
-    job.salary = req.body.location;
-    await job.save();
+    const updatejob = await job_offer.update(
+      { location, title, skills, degrees, majors, salary, tags },
+      { where: { id: req.params.id } }
+    );
 
     res.status(200).json({
       success: true,
@@ -122,12 +124,14 @@ const deleteJob = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 const getAlldataJobs = async (req, res) => {
   try {
-
+  
     // Find all jobs for recruiter id
     const jobs = await job_offer.findAll(
-      );
+
+      {where :{verified : true}});
 
     res.status(200).json({
       success: true,
@@ -136,14 +140,40 @@ const getAlldataJobs = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Server Error" });
   }
 };
+
+const gettalljobbytag = async (req, res) => {
+  try {
+    const tag = req.params.tag;
+    const jobOffers = await job_offer.findAll({
+      where: {
+        tags: {
+          [Op.contains]: [tag],
+        },
+        verified : true ,
+      },
+    });
+    res.status(200).json({
+      success: true, 
+      message: "Working successfully",
+      data : jobOffers,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: error.message })
+  };
+};
+
+
+
 module.exports = {
   deleteJob,
   CreateJob,
   updateJob,
   getAllJobs,
   getJobById,
-  getAlldataJobs
+  getAlldataJobs,
+  gettalljobbytag,
 };
