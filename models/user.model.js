@@ -62,7 +62,7 @@ const User = sequelize.define(
     genre : 
     {
       type: DataTypes.ENUM,
-      values: ["male", "female"],
+      values: ["Male", "Female"],
       require: true,
       allowNull : false,
     }

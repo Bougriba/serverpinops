@@ -1,4 +1,5 @@
 import React,{ useState} from 'react';
+import jwt_decode from 'jwt-decode';
 import {
   MDBBtn,
   MDBContainer,
@@ -24,12 +25,21 @@ function Login() {
     Axios.post('http://localhost:8002/api/auth/login', user)
       .then(response => {
         console.log(response);
+        const token = response.data.token;
+        localStorage.setItem('user', token);
+        const decodedToken = jwt_decode(token);
+        if(decodedToken.Role === 'Recruiter') {
+          console.log('user is a recruiter');
+        }else if(decodedToken.role === 'job_seeker') {
+          console.log('user is a jobseeker');
+        }
       })
       .catch(error => {
         console.error(error);
         
       });
   };
+ 
   return (
     <form onSubmit={handleSubmit}>
     <MDBContainer fluid className='p-4 background-radial-gradient overflow-hidden'>

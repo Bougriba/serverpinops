@@ -25,11 +25,11 @@ function App() {
         <Route path="/Home" element={<AllJobs data={jobs} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/Job" element={<OneJob />} />
-
+        <Route path="/Job/:id" element={<OneJob />} />
       </Routes>
     </Router>
   );
+  
 }
 
 export default App;

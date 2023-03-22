@@ -52,11 +52,11 @@ const getAllJobs = async (req, res) => {
 const getJobById = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
-    const idUser = req.user.userId;
+    // const idUser = req.user.userId;
 
     // Find job by id and recruiter id
     const job = await job_offer.findOne({
-      where: { id: req.params.id, idUser: idUser },
+      where: { id: req.params.id, },
     });
 
     if (!job) {

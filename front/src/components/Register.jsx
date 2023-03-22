@@ -13,6 +13,7 @@ import {
 from 'mdb-react-ui-kit';
 import '../styles/register.css'
 import Axios from 'axios'
+import jwtDecode from 'jwt-decode'; 
 const job_seeker = 'job_seeker';
 const Recruiter = 'recruiter';
 function Register() {
@@ -21,19 +22,39 @@ function Register() {
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
   const [role,setRole] = useState('')
+  const [genre,setGenre] = useState('')
   
   // function handleOptionChange(event) {
   //   setSelectedOption(event.target.id);
   // }
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = { fullName, email, password, role };
+    const data = { fullName, email, password, role, genre };
     Axios.post('http://localhost:8002/api/auth/register', data)
       .then(response => {
         console.log(response);
+  
+        // generate JWT token after successful registration
+        Axios.post('http://localhost:8002/api/auth/login', {
+          email: data.email,
+          password: data.password
+        })
+        .then(response => {
+          // decode the JWT token to get the user data
+          const decodedToken = jwtDecode(response.data.token);
+          console.log(decodedToken);
+  
+          // store the token in local storage for future use
+          localStorage.setItem('token', response.data.token);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+  
       })
       .catch(error => {
         console.error(error);
+        alert('User Already Exists')
         
       });
   };
@@ -77,6 +98,18 @@ function Register() {
 
               <MDBInput wrapperClass='mb-4' label='Email' id='form3' type='email' value={email} onChange={(e) => setEmail(e.target.value)}/>
               <MDBInput wrapperClass='mb-4' label='Password' id='form4' type='password' value={password} onChange={(e) => setPassword(e.target.value)}/>
+  <select  id='form4' value={genre} onChange={(e) => setGenre(e.target.value)} style={{ 
+    backgroundColor: '#f5f5f5',
+    border: '1px solid #ddd',
+    borderRadius: '5px',
+    padding: '10px',
+    width: '100%'
+  }}>
+    <option value='Male'>Male</option>
+    <option value='Female'>Female</option>
+  </select>
+
+
               {/* <MDBInput wrapperClass='mb-4' label='Age' id='form4' type='Number'/>
               <MDBInput wrapperClass='mb-4' label='Phone Number' id='form4' type='Number'/> */}
               <div>

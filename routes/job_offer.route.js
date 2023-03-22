@@ -13,7 +13,7 @@ Router.post("/", authMiddleware, jobroleMiddleware, CreateJob);
 Router.get("/", getAlldataJobs);
 Router.get("/jobOffers/:tag", gettalljobbytag);
 Router.get("/jobs",authMiddleware,jobroleMiddleware, getAllJobs);
-Router.get("/:id",authMiddleware,jobroleMiddleware, getJobById); //req.params.id
+Router.get("/:id", getJobById); //req.params.id
 Router.delete("/:id",authMiddleware , jobroleMiddleware, deleteJob);
 Router.put("/:id",authMiddleware,jobroleMiddleware,updateJob);
 
