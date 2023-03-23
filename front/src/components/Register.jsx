@@ -14,6 +14,7 @@ from 'mdb-react-ui-kit';
 import '../styles/register.css'
 import Axios from 'axios'
 import jwtDecode from 'jwt-decode'; 
+import { Link } from 'react-router-dom'
 const job_seeker = 'job_seeker';
 const Recruiter = 'recruiter';
 function Register() {
@@ -151,9 +152,9 @@ function Register() {
 
                {
                 <div className="text-center">
-
+                  <Link to='/Login'>
                 <p>Already Have an Account?</p>
-
+                </Link>
                 <MDBBtn tag='a' color='none' className='mx-3' style={{ color: '#1266f1' }}>
                   <MDBIcon fab icon='facebook-f' size="sm"/>
                 </MDBBtn> 

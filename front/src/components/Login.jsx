@@ -1,4 +1,6 @@
 import React,{ useState} from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import jwt_decode from 'jwt-decode';
 import {
   MDBBtn,
@@ -16,29 +18,33 @@ import '../styles/register.css'
 import Axios from 'axios'
 
 function Login() {
+  const navigate = useNavigate();
+
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
 
   const handleSubmit = (event) => {
+    
     event.preventDefault();
-    const user = {  email, password };
+    const user = { email, password };
     Axios.post('http://localhost:8002/api/auth/login', user)
-      .then(response => {
+      .then((response) => {
         console.log(response);
         const token = response.data.token;
         localStorage.setItem('user', token);
+
         const decodedToken = jwt_decode(token);
-        if(decodedToken.Role === 'Recruiter') {
-          console.log('user is a recruiter');
-        }else if(decodedToken.role === 'job_seeker') {
-          console.log('user is a jobseeker');
-        }
+        console.log(decodedToken);
+        if (decodedToken.role === 'recruiter' || decodedToken.role === 'job_seeker') {
+          console.log('user is logged in as ' + decodedToken.role);
+          // Navigate to the Profile component
+          navigate('/profile', { state: { userId: decodedToken.userId } });        }
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
-        
       });
   };
+  
  
   return (
     <form onSubmit={handleSubmit}>

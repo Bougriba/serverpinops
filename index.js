@@ -41,7 +41,7 @@ app.use("/api/jobs", job_offerRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use(cors({
-  origin: 'http://localhost:3001',
+  origin: 'http://localhost:3000',
 }));
 
 const port = process.env.PORT || 8002;
