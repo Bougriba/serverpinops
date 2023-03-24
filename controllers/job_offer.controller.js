@@ -1,5 +1,6 @@
 const Recruiter = require("../models/recruiter.model");
 const job_offer = require("../models/job_offers.model");
+const user = require('../models/user.model')
 const { Op } = require("sequelize");
 const CreateJob = async (req, res) => {
   try {
@@ -131,7 +132,17 @@ const getAlldataJobs = async (req, res) => {
     // Find all jobs for recruiter id
     const jobs = await job_offer.findAll(
 
-      {where :{verified : true}});
+      {where :{verified : true},
+      include: [
+       
+        {
+          model: user,
+          attributes: ["imageData","imageName","imageType","role"],
+          required: false,
+        },
+      ]
+       
+    });
 
     res.status(200).json({
       success: true,

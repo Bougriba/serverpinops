@@ -1,21 +1,26 @@
 import React from "react";
 import { Link } from 'react-router-dom';
+import '../index.css'
 function AllJobs(props) {
   const { data } = props;
-
-  console.log("data:", data);
+  const role = data.data[0].User.role
+  
 
   if (!Array.isArray(data.data)) {
     console.log("Data is not an array:", data);
     return <div>No data found.</div>;
   }
   const jobs = data.data;
-  console.log("jobs:", jobs);
+  // console.log("jobs:", jobs);
 
   if (!Array.isArray(jobs)) {
     console.log("Jobs is not an array:", jobs);
     return <div>No job data found.</div>;
   }
+  if(role === 'job_seeker') {
+
+  }
+  
   return (
     <>
       {jobs.map((e) => {
@@ -25,16 +30,13 @@ function AllJobs(props) {
               <div className="job-title">{e.title}</div>
               <div className="job-details">
                 <div className="job-property">
-                  <span className="job-label">Location:</span>
-                  <span className="job-value">{e.location}</span>
+                  <span className="job-location">Location:</span>
+                  <span className="job-location">{e.location}</span>
                 </div>
-                <div className="job-property">
-                  <span className="job-label">Salary:</span>
-                  <span className="job-value">{e.salary}</span>
-                </div>
+                
                 <div className="job-property">
                   <span className="job-label">Description:</span>
-                  <span className="job-value">{e.job_description}</span>
+                  <span className="job-desciprtion">{e.job_description}</span>
                 </div>
                 <div className="job-property">
                   <span className="job-label">Tags:</span>

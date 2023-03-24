@@ -18,9 +18,9 @@ function OneJob() {
       });
   }, [id]);
 
-  if (!job && !jobData) {
-    return <div>Loading...</div>;
-  }
+  // if (user.role === 'job_seeker') {
+  //   console.log('user is a job seeker and can apply for a job')
+  // }
 
   return (
     <div className="job-block">

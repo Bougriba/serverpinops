@@ -13,7 +13,8 @@ function App() {
     const data = axios.get("http://localhost:8002/api/jobs/")
       .then(response => {
         setJobs(response.data);
-        // console.log(data);
+        
+       
       })
       .catch(error => {
         console.error(error);
