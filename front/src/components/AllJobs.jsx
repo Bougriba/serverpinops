@@ -17,9 +17,7 @@ function AllJobs(props) {
     console.log("Jobs is not an array:", jobs);
     return <div>No job data found.</div>;
   }
-  if(role === 'job_seeker') {
-
-  }
+  
   
   return (
     <>

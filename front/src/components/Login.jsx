@@ -38,7 +38,7 @@ function Login() {
         if (decodedToken.role === 'recruiter' || decodedToken.role === 'job_seeker') {
           console.log('user is logged in as ' + decodedToken.role);
           // Navigate to the Profile component
-          navigate('/profile', { state: { userId: decodedToken.userId } });        }
+          navigate('/Home', { state: { userId: decodedToken.userId } });        }
       })
       .catch((error) => {
         console.error(error);

@@ -28,7 +28,9 @@ function Profile() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  
+  //  Remaining -- > get all condidats / delete candidats for job_seeker
+  //  Recruiter --> jobs posted / delete job / create job / find all jobs / update. / get 7asb score.
+  //  Admin -- > Verification , Crude on users 
   useEffect(() => {
     const token = localStorage.getItem('user');
     

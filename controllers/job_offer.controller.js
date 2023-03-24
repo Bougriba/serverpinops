@@ -58,6 +58,14 @@ const getJobById = async (req, res) => {
     // Find job by id and recruiter id
     const job = await job_offer.findOne({
       where: { id: req.params.id, },
+      include: [
+       
+        {
+          model: user,
+          attributes: ["role"],
+          required: false,
+        },
+      ]
     });
 
     if (!job) {
