@@ -1,10 +1,11 @@
-const express = require("express");
-const app = express();
-const morgan = require("morgan");
-const cors = require('cors');
-app.use(cors());
+const isDev = process.env.NODE_ENV === "development";
+require("dotenv").config({
+  path: require("path").join(
+    __dirname,
+    isDev == "development" ? ".env.dev" : ".env"
+  ),
+});
 
-require("dotenv").config();
 // const multer = require("multer");
 // const storage = multer.memoryStorage();
 
@@ -19,18 +20,34 @@ require("dotenv").config();
 
 // const upload = multer({ storage,fileFilter });
 
-const userRoutes = require("./routes/user.route");
+const express = require("express");
+const morgan = require("morgan");
+const cors = require("cors");
+const app = express();
+
+const users = require("./routes/user.route");
 const authRoutes = require("./routes/auth.route");
 const job_offerRoutes = require("./routes/job_offer.route");
 const candidatRoute = require("./routes/candidats.route");
+
 const createprofile = require("./routes/createprofile.route");
 const adminroutes = require("./routes/admin.route");
 const superadminroute = require("./routes/superadmin.route");
+const { requires, ROLES } = require("./middleware/role.middleware");
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-if (process.env.NODE_ENV === "development") {
+app.use(express.static("public"));
+if (isDev) {
   app.use(morgan("dev"));
 }
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
+
 // app.use(upload.single("pdf"));
 // app.use(upload.single("pdf"));
 app.use("/api/superadmin", superadminroute);
@@ -39,12 +56,15 @@ app.use("/api/profile", createprofile);
 app.use("/api/candidats", candidatRoute);
 app.use("/api/jobs", job_offerRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use(cors({
-  origin: 'http://localhost:3000',
-}));
+app.use("/api/users", users);
+
+app.use((err, _, res, __) => {
+  const status = err.status || 500;
+  const message = err.message || "Something went wrong";
+  res.status(status).json({ status, message });
+});
 
 const port = process.env.PORT || 8002;
 app.listen(port, () => {
-  console.log("Server is working" + port);
+  console.log("Server is working", port);
 });
