@@ -25,13 +25,14 @@ function AllJobs(props) {
         return (
           <div key={e.id} className="job-block">
           <Link to={{ pathname: `/Job/${e.id}`, state: { job: e } }}>
+            
               <div className="job-title">{e.title}</div>
               <div className="job-details">
                 <div className="job-property">
                   <span className="job-location">Location:</span>
                   <span className="job-location">{e.location}</span>
                 </div>
-                
+                <Link to={{ pathname: `/Form/${e.id}`, state: { job: e } }}></Link>
                 <div className="job-property">
                   <span className="job-label">Description:</span>
                   <span className="job-desciprtion">{e.job_description}</span>
@@ -41,7 +42,9 @@ function AllJobs(props) {
                   <span className="job-value">{e.tags}</span>
                 </div>
               </div>
+              
             </Link>
+            
           </div>
         );
       })}

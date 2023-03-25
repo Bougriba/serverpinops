@@ -9,6 +9,7 @@ import Navbar from './components/Navbar'
 import Profile from './components/Profile'
 function App() {
   const [jobs, setJobs] = useState([]);
+  
   useEffect(() => {
     const data = axios.get("http://localhost:8002/api/jobs/")
       .then(response => {
@@ -30,6 +31,7 @@ function App() {
         <Route path="/Job/:id" element={<OneJob />} />
         <Route path="/Home" element={<Navbar />} />
         <Route path="/Profile" element={<Profile />} />
+        
       </Routes>
     </Router>
   );
