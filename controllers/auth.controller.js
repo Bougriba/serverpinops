@@ -75,13 +75,12 @@
 //     login,
 //     register
 // };
-
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const Recruiter = require("../models/recruiter.model");
 const Job_seeker = require("../models/job_seeker.model");
-
+const fs = require('fs');
 const login = async function (req, res) {
   try {
     const { email, password } = req.body;
@@ -89,12 +88,12 @@ const login = async function (req, res) {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid email or password 1",
+        message: "Invalid email or password",
       });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
-     //const isValidPassword = password == user.password;
+    //const isValidPassword = password == user.password;
     if (!isValidPassword) {
       return res.status(400).json({
         success: false,
@@ -109,7 +108,6 @@ const login = async function (req, res) {
         expiresIn: "1d",
       }
     );
-
     return res.status(200).json({
       success: true,
       message: "Successfully logged in",
@@ -118,7 +116,7 @@ const login = async function (req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      errorMessage: "server error",
+      errorMessage: error.message,
     });
   }
 };
@@ -129,15 +127,29 @@ const register = async function register(req, res) {
       fullName,
       email,
       password,
-      // age,
-      // phoneNumber,
+       age,
+      phoneNumber,
       // image,
       role,
+      genre,
       // company,
       // skills,
       // degrees,
       // majors,
-    }  = req.body;
+    } = req.body;
+    let imageData, imageType, imageName;
+  if (req.file) {
+    const { mimetype, originalname, buffer } = req.file;
+    imageData = buffer;
+    imageType = mimetype;
+    imageName = originalname;
+  } else {
+    const defaultImage = fs.readFileSync("public/images/defaultimage.png");
+    imageData = defaultImage;
+    imageType = "image/png"; // Set the default image type
+    imageName = "default.png"; // Set the default image name
+  }
+  
     const userExists = await User.findOne({ where: { email } });
     if (userExists) {
       return res.status(409).json({
@@ -148,58 +160,57 @@ const register = async function register(req, res) {
 
     const genSalt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, genSalt);
-    console.log(password, hashedPassword);
+    //console.log(password, hashedPassword);
     let user;
 
-    // if (role === "recruiter") {
-    //   user = await User.create(
-    //     {
-    //       fullName,
-    //       email,
-    //       password: hashedPassword,
-    //       age,
-    //       phoneNumber,
-    //       image,
-    //       role,
-    //       Recruiter: {
-    //         company,
-    //       },
-    //     },
-    //     {
-    //       include: [Recruiter],
-    //     }
-    //   );
-    // } else if (role === "job_seeker") {
-    //   user = await User.create(
-    //     {
-    //       fullName,
-    //       email,
-    //       password: hashedPassword,
-    //       age,
-    //       phoneNumber,
-    //       image,
-    //       role,
-    //       Job_seeker: {
-    //         skills: skills,
-    //         degrees: degrees,
-    //         majors: majors,
-    //       },
-    //     },
-    //     {
-    //       include: [Job_seeker],
-    //     }
-    //   );
-    // } else {
-      user = await User.create({
-        fullName,
-        email,
-        password: hashedPassword,
-        // age,
-        // phoneNumber,
-        // image,
-        role,
-      });
-    // }
+    if (role === "recruiter") {
+      user = await User.create(
+        {
+          fullName,
+          email,
+          password: hashedPassword,
+          age,
+          phoneNumber,
+          imageData , imageType,imageName ,
+          role,
+          genre ,
+          Recruiter: {
+          },
+        },
+        {
+          include: [Recruiter],
+        }
+      );
+    } else if (role === "job_seeker") {
+      user = await User.create(
+        {
+          fullName,
+          email,
+          password: hashedPassword,
+          age,
+          phoneNumber,
+          imageData , imageType,imageName ,
+          role,
+          genre ,
+          Job_seeker: {
+          },
+        },
+        {
+          include: [Job_seeker],
+        }
+      );
+    } else {
+    user = await User.create({
+      fullName,
+      email,
+      password: hashedPassword,
+       age,
+       phoneNumber,
+       imageData, imageType, imageName,
+      role,
+      genre,
+    });
+    }
 
     return res.status(201).json({
       success: true,
@@ -208,12 +219,23 @@ const register = async function register(req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      errorMessage: 'Server error',
+      errorMessage: error.message,
     });
   }
 };
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
 
+  jwt.verify(token, process.env.PASSWORD_HASH_TOKEN, (err, user) => {
+    if (err) return res.status(403).json({ message: "Forbidden" });
+    req.user = user;
+    next();
+  });
+};
 module.exports = {
   login,
   register,
+  authenticateToken
 };

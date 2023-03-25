@@ -3,7 +3,7 @@ const sequelize = require("../config/db");
 const Recruiter = require("./recruiter.model");
 const job_offer = require("./job_offers.model");
 const candidats = require("./candidats.model");
-const Job_seeker=require("./job_seeker.model")
+const Job_seeker = require("./job_seeker.model");
 const User = sequelize.define(
   "User",
   {
@@ -41,8 +41,16 @@ const User = sequelize.define(
         isInt: true,
       },
     },
-    image: {
-      type: DataTypes.BLOB,
+    imageType: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    imageName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    imageData: {
+      type: DataTypes.BLOB("long"),
       allowNull: true,
     },
     role: {
@@ -51,6 +59,13 @@ const User = sequelize.define(
       require: true,
       allowNull: false,
     },
+    genre : 
+    {
+      type: DataTypes.ENUM,
+      values: ["Male", "Female"],
+      require: true,
+      allowNull : false,
+    }
   },
   {
     freezeTableName: true,

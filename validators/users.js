@@ -7,6 +7,10 @@ const validateCreate = async (user) => {
       fullName: string().required("Full name is required"),
       password: string().required("Password is required"),
       email: string().email().required("Email is required"),
+      genre: mixed()
+        .oneOf(["Male", "Female"], "Gender must be either Male or Female")
+        .required("Role is required")
+        .defined(),
       age: number()
         .required("Age is required")
         .positive("Age must be positive"),

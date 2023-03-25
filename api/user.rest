@@ -9,6 +9,7 @@ content-type: application/json
   "fullName": "admin",
   "email": "admin2@local.com",
   "password": "321Assdx",
+  "genre": "Other",
   "age": 25,
   "phoneNumber": "+1234567890",
   "role": "recruiter",

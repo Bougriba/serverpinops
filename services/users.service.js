@@ -3,7 +3,7 @@ const User = require("../models/user.model");
 const Recruiter = require("../models/recruiter.model");
 const Job_seeker = require("../models/job_seeker.model");
 const bcrypt = require("bcrypt");
-
+const fs = require("fs");
 const yup = require("../validators/users");
 
 const getAll = async ({ role = "" }) => {
@@ -26,7 +26,12 @@ const getAll = async ({ role = "" }) => {
       include: [],
     },
   });
-  return users;
+
+  return users.map((u) => {
+    const { password, ...user } = u.get();
+    user.imageData = user.imageData.toString("base64");
+    return user;
+  });
 };
 
 const getById = async (id) => {
@@ -53,15 +58,28 @@ const getById = async (id) => {
     throw createError(404, `User not found with id ${id}`);
   }
 
+  user.imageData = user.imageData.toString("base64");
   return user;
 };
 
-const register = async (payload) => {
+const register = async (payload, file) => {
   payload = await yup.validateCreate(payload);
 
   const user = await User.findOne({ where: { email: payload.email } });
   if (user) {
     throw createError(400, "User already exists");
+  }
+
+  if (file) {
+    const { mimetype, originalname, buffer } = file;
+    payload.imageData = buffer;
+    payload.imageType = mimetype;
+    payload.imageName = originalname;
+  } else {
+    const defaultImage = fs.readFileSync("public/images/defaultimage.png");
+    payload.imageData = defaultImage;
+    payload.imageType = "image/png"; // Set the default image type
+    payload.imageName = "default.png"; // Set the default image name
   }
 
   // encrypt password
@@ -97,7 +115,10 @@ const register = async (payload) => {
   });
 
   delete newUser.password;
-  return newUser;
+  return {
+    id: newUser.id,
+    message: `${newUser.fullName} is created`,
+  };
 };
 
 const updateById = async (id, payload) => {
@@ -160,10 +181,58 @@ const deleteById = async (id) => {
   };
 };
 
+const uploadPDF = async (file, user) => {
+  if (!file) {
+    throw createError(400, "No file uploaded");
+  }
+
+  const { mimetype, originalname, buffer } = file;
+
+  const userToUpdate = await Job_seeker.findOne({
+    where: { idUser: user.userId },
+  });
+
+  if (!userToUpdate) {
+    throw createError(404, "User not found");
+  }
+
+  await userToUpdate.update(
+    { pdfdata: buffer, pdfName: originalname, pdfType: mimetype },
+    { where: { idUser: user.userId } }
+  );
+
+  return {
+    message: "File is successfully uploaded",
+  };
+};
+
+const uploadImageyourself = async (file, user) => {
+  const { mimetype, originalname, buffer } = file;
+
+  const userToUpdate = await User.findOne({
+    where: { id: user.userId },
+  });
+
+  if (!userToUpdate) {
+    throw createError(404, "User not found");
+  }
+
+  await userToUpdate.update(
+    { imageData: buffer, imageType: mimetype, imageName: originalname },
+    { where: { id: user.userId } }
+  );
+
+  return {
+    message: "Image is successfully uploaded",
+  };
+};
+
 module.exports = {
   getAll,
   getById,
   register,
   updateById,
   deleteById,
+  uploadPDF,
+  uploadImageyourself,
 };

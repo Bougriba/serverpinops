@@ -1,0 +1,14 @@
+/* add this to your CSS file or <style> tag */
+.navbar-nav {
+    margin-right: auto; /* push items to the right */
+    font-weight: bold; /* make the text bold */
+  }
+  
+  .navbar-item {
+    margin-right: 20px; /* add some spacing between items */
+  }
+  
+  .navbar-link {
+    color: white !important; /* set the link color to white */
+  }
+  

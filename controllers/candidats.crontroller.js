@@ -11,7 +11,7 @@ const createCandidat = async (req, res) => {
       if (!jobOffer) {
         return res.status(400).json({ message: 'Job offer not found' });
       }
-      const { skills, degrees, majors } = req.body;
+      
       // Check if candidate already exists for the job offer
       const existingCandidate = await Candidats.findOne({ where: { idJob : job_id, idUser:applier_id } });
       if (existingCandidate) {
@@ -53,7 +53,7 @@ const getCandidatById = async (req, res) => {
 };
 
 const getAllCandidats = async (req, res) => {
-    const applier_id = req.user.userId;
+  const applier_id = req.user.userId;
     try {
         const candidats = await Candidats.findAll(
             {
