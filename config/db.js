@@ -1,12 +1,18 @@
 const { Sequelize } = require("sequelize");
 
-const db = new Sequelize("postgres", "postgres", "mahdi", {
-  host: "localhost",
-  port: 5000,
-  dialect: "postgres",
-});
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USERNAME,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: process.env.DB_DIALECT,
+  }
+);
 
-db.authenticate()
+sequelize
+  .authenticate()
   .then(() => {
     console.log("Connection has been established successfully.");
   })
@@ -14,7 +20,8 @@ db.authenticate()
     console.error("Unable to connect to the database:", error);
   });
 
-db.sync()
+sequelize
+  .sync()
   .then(() => {
     console.log("All models were synchronized successfully.");
   })
@@ -22,4 +29,4 @@ db.sync()
     console.error("An error occurred while synchronizing the models:", error);
   });
 
-module.exports = db;
+module.exports = sequelize;
