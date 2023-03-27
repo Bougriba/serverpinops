@@ -26,8 +26,9 @@ function Profile() {
   const [image, setImage] = useState(null);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  
+  
   //  Remaining -- > get all condidats / delete candidats for job_seeker
   //  Recruiter --> jobs posted / delete job / create job / find all jobs / update. / get 7asb score.
   //  Admin -- > Verification , Crude on users 
@@ -49,15 +50,17 @@ function Profile() {
   useEffect(() => {
     console.log(user)
   },[user])
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   try {
-  //     const response = await Axios.put(`http://localhost:8002/api/users/${9}`, { fullName, email });
-  //     console.log(response.data.message);
-  //   } catch (error) {
-  //     console.log(error.response.data.message);
-  //   }
-  // };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const token = localStorage.getItem('user');
+    const decodedToken = jwt_decode(token);
+    try {
+      const response = await Axios.put(`http://localhost:8002/api/users/${decodedToken.userId}`, { fullName, email, phoneNumber, });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleImageUpload = async () => {
     const jwtToken = localStorage.getItem('user');
     console.log(jwtToken);
@@ -72,13 +75,15 @@ formData.append('image', image);
 
 try {
   const response = await Axios.post('http://localhost:8002/api/users/upload', formData, {
+    
     headers: {
       'Content-Type': 'multipart/form-data',
       Authorization: `${jwtToken}`,
     },
-  });
+  })
+  
 
-  console.log(response.data.message);
+  console.log(response);
   // Handle success response
 } catch (error) {
   console.error(error);
@@ -97,6 +102,7 @@ try {
 <div>
   <input type="file" onChange={handleImageChange} />
   <button onClick={handleImageUpload}>Upload</button>
+  <button onClick={handleSubmit}>Update</button>
 </div>
     
    
@@ -114,6 +120,11 @@ try {
                 <MDBBreadcrumbItem>
                   <a href="#">User</a>
                 </MDBBreadcrumbItem>
+                <Link to='/MyJobs'>
+                <MDBBreadcrumbItem active>My jobs
+                
+              </MDBBreadcrumbItem>
+              </Link>
                 <MDBBreadcrumbItem active>User Profile</MDBBreadcrumbItem>
               </MDBBreadcrumb>
             </MDBCol>
@@ -225,8 +236,8 @@ try {
                     </MDBCol>
                     <MDBCol sm="9">
                     <MDBInput
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                     />
                       <MDBCardText className="text-muted">{user.phoneNumber}</MDBCardText>
                     </MDBCol>
@@ -242,15 +253,9 @@ try {
                   </MDBRow>
                   <hr />
                   <MDBRow>
-                    <MDBCol sm="3">
-                      <MDBCardText>Address</MDBCardText>
-                    </MDBCol>
+                    
                     <MDBCol sm="9">
-                    <MDBInput
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                    />
-                      <MDBCardText className="text-muted">{user.address}</MDBCardText>
+                 
                     </MDBCol>
                   </MDBRow>
                 </MDBCardBody>

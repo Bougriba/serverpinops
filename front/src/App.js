@@ -7,6 +7,7 @@ import AllJobs from './components/AllJobs.jsx';
 import OneJob from './components/OneJob.jsx';
 import Navbar from './components/Navbar'
 import Profile from './components/Profile'
+import MyJobs from './components/MyJobs.jsx';
 function App() {
   const [jobs, setJobs] = useState([]);
   
@@ -31,6 +32,7 @@ function App() {
         <Route path="/Job/:id" element={<OneJob />} />
         <Route path="/Home" element={<Navbar />} />
         <Route path="/Profile" element={<Profile />} />
+        <Route path="/MyJobs" element={<MyJobs />} />
         
       </Routes>
     </Router>
