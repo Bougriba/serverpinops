@@ -80,7 +80,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const Recruiter = require("../models/recruiter.model");
 const Job_seeker = require("../models/job_seeker.model");
-const fs = require('fs');
+const fs = require("fs");
 const login = async function (req, res) {
   try {
     const { email, password } = req.body;
@@ -103,9 +103,9 @@ const login = async function (req, res) {
 
     const token = jwt.sign(
       { userId: user.id, fullName: user.fullName, role: user.role },
-      process.env.PASSWORD_HASH_TOKEN,
+      process.env.JWT_SECRET,
       {
-        expiresIn: "1d",
+        expiresIn: process.env.JWT_EXPIRES_IN,
       }
     );
     return res.status(200).json({
@@ -127,7 +127,7 @@ const register = async function register(req, res) {
       fullName,
       email,
       password,
-       age,
+      age,
       phoneNumber,
       // image,
       role,
@@ -138,18 +138,18 @@ const register = async function register(req, res) {
       // majors,
     } = req.body;
     let imageData, imageType, imageName;
-  if (req.file) {
-    const { mimetype, originalname, buffer } = req.file;
-    imageData = buffer;
-    imageType = mimetype;
-    imageName = originalname;
-  } else {
-    const defaultImage = fs.readFileSync("public/images/defaultimage.png");
-    imageData = defaultImage;
-    imageType = "image/png"; // Set the default image type
-    imageName = "default.png"; // Set the default image name
-  }
-  
+    if (req.file) {
+      const { mimetype, originalname, buffer } = req.file;
+      imageData = buffer;
+      imageType = mimetype;
+      imageName = originalname;
+    } else {
+      const defaultImage = fs.readFileSync("public/images/defaultimage.png");
+      imageData = defaultImage;
+      imageType = "image/png"; // Set the default image type
+      imageName = "default.png"; // Set the default image name
+    }
+
     const userExists = await User.findOne({ where: { email } });
     if (userExists) {
       return res.status(409).json({
@@ -171,11 +171,12 @@ const register = async function register(req, res) {
           password: hashedPassword,
           age,
           phoneNumber,
-          imageData , imageType,imageName ,
+          imageData,
+          imageType,
+          imageName,
           role,
-          genre ,
-          Recruiter: {
-          },
+          genre,
+          Recruiter: {},
         },
         {
           include: [Recruiter],
@@ -189,27 +190,30 @@ const register = async function register(req, res) {
           password: hashedPassword,
           age,
           phoneNumber,
-          imageData , imageType,imageName ,
+          imageData,
+          imageType,
+          imageName,
           role,
-          genre ,
-          Job_seeker: {
-          },
+          genre,
+          Job_seeker: {},
         },
         {
           include: [Job_seeker],
         }
       );
     } else {
-    user = await User.create({
-      fullName,
-      email,
-      password: hashedPassword,
-       age,
-       phoneNumber,
-       imageData, imageType, imageName,
-      role,
-      genre,
-    });
+      user = await User.create({
+        fullName,
+        email,
+        password: hashedPassword,
+        age,
+        phoneNumber,
+        imageData,
+        imageType,
+        imageName,
+        role,
+        genre,
+      });
     }
 
     return res.status(201).json({
@@ -237,5 +241,5 @@ const authenticateToken = (req, res, next) => {
 module.exports = {
   login,
   register,
-  authenticateToken
+  authenticateToken,
 };

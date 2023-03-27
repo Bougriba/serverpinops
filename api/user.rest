@@ -1,4 +1,16 @@
+POST http://localhost:3000/api/auth/login HTTP/1.1
+content-type: application/json
+
+{
+  "email": "job_seeker@local.com",
+  "password": "321Assdx"
+}
+
+
+###
+
 GET http://localhost:3000/api/users
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImZ1bGxOYW1lIjoiYWRtaW4iLCJyb2xlIjoicmVjcnVpdGVyIiwiaWF0IjoxNjc5OTMzNzg3LCJleHAiOjE2ODAwMjAxODd9.Qtrff2KLHoWTSVP_ObZrlN2azTTtHUUVzwTSwltT6LE
 
 ###
 
@@ -6,14 +18,37 @@ POST http://localhost:3000/api/users HTTP/1.1
 content-type: application/json
 
 {
-  "fullName": "admin",
-  "email": "admin2@local.com",
+  "fullName": "job_seeker",
+  "email": "job_seeker@local.com",
   "password": "321Assdx",
-  "genre": "Other",
+  "genre": "Male",
+  "age": 25,
+  "phoneNumber": "+1234567890",
+  "role": "job_seeker",
+  "skills": ["LOL"],
+  "degrees": ["LOL"],
+  "majors": ["LOL"]
+}
+
+
+###
+
+DELETE http://localhost:3000/api/users/12 HTTP/1.1
+
+###
+
+POST http://localhost:3000/api/users HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "recruiter",
+  "email": "recruiter@local.com",
+  "password": "321Assdx",
+  "genre": "Male",
   "age": 25,
   "phoneNumber": "+1234567890",
   "role": "recruiter",
-  "company": "EDreams"
+  "company": "e-Recruiter"
 }
 
 ###
@@ -30,8 +65,3 @@ content-type: application/json
   "role": "recruiter",
   "company": "TheDreams"
 }
-
-
-###
-
-DELETE http://localhost:3000/api/users/3 HTTP/1.1
