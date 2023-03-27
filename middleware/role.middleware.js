@@ -1,5 +1,6 @@
 const createHttpError = require("http-errors");
 const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
 
 const ROLES = {
   ADMIN: "admin",
@@ -29,18 +30,21 @@ const requires = (roles = []) =>
     if (!token) {
       throw createHttpError(401, "Unauthorized");
     }
+    console.log(req.headers.authorization);
 
     try {
-      const decodedToken = jwt.verify(token, process.env.PASSWORD_HASH_TOKEN);
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
       const role = decodedToken.role;
 
       if (!roles.includes(role)) {
         throw createHttpError(403, "Forbidden");
       }
 
+      req.user = decodedToken;
+
       next();
     } catch (error) {
-      throw createHttpError(401, "Unauthorized");
+      throw createHttpError(401, error.message);
     }
   });
 

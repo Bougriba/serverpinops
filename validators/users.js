@@ -23,18 +23,18 @@ const validateCreate = async (user) => {
         is: "recruiter",
         then: (schema) => schema.required("Company is required"),
       }),
-      skills: string().when("role", {
-        is: "job_seeker",
-        then: (schema) => schema.required("Skills are required"),
-      }),
-      degrees: string().when("role", {
-        is: "job_seeker",
-        then: (schema) => schema.required("Degrees are required"),
-      }),
-      majors: string().when("role", {
-        is: "job_seeker",
-        then: (schema) => schema.required("Majors are required"),
-      }),
+      // skills: array().when("role", {
+      //   is: "job_seeker",
+      //   then: (schema) => schema.required("Skills are required"),
+      // }),
+      // degrees: array().when("role", {
+      //   is: "job_seeker",
+      //   then: (schema) => schema.required("Degrees are required"),
+      // }),
+      // majors: array().when("role", {
+      //   is: "job_seeker",
+      //   then: (schema) => schema.required("Majors are required"),
+      // }),
     });
     const data = schema.validateSync(user);
 
