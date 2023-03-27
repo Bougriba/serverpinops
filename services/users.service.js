@@ -187,7 +187,7 @@ const uploadPDF = async (file, user) => {
   }
 
   const { mimetype, originalname, buffer } = file;
-
+  console.log(user.userId);
   const userToUpdate = await Job_seeker.findOne({
     where: { idUser: user.userId },
   });

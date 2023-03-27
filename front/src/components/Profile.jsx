@@ -75,28 +75,25 @@ formData.append('image', image);
 
 try {
   const response = await Axios.post('http://localhost:8002/api/users/upload', formData, {
-    
+
     headers: {
       'Content-Type': 'multipart/form-data',
       Authorization: `${jwtToken}`,
     },
   })
   
-
+  
   console.log(response);
   // Handle success response
 } catch (error) {
   console.error(error);
   // Handle error response
 }
-
   }
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     setImage(file);
   };
-
-  
   return (
     <>
 <div>

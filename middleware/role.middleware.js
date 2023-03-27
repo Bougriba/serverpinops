@@ -5,7 +5,7 @@ const ROLES = {
   ADMIN: "admin",
   SUPERADMIN: "superadmin",
   RECRUITER: "recruiter",
-  JOB_SEEKER: "job-seeker",
+  JOB_SEEKER: "job_seeker",
 };
 
 const requires = (roles = []) =>

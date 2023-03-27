@@ -2,8 +2,9 @@ import React from "react";
 import { Link } from 'react-router-dom';
 import '../index.css'
 function AllJobs(props) {
+  console.log(props);
   const { data } = props;
-  const role = data.data[0].User.role
+  
   
 
   if (!Array.isArray(data.data)) {
@@ -27,6 +28,14 @@ function AllJobs(props) {
           <Link to={{ pathname: `/Job/${e.id}`, state: { job: e } }}>
             
               <div className="job-title">{e.title}</div>
+              <div className='img'>
+  
+    <img
+      src={`data:image/png;base64, ${e.imageData}`}
+      alt="user image"
+      style={{ width: "200px", height: "200px", objectFit: "cover" }}
+    />
+</div>
               <div className="job-details">
                 <div className="job-property">
                   <span className="job-location">Location:</span>

@@ -23,7 +23,7 @@ function Register() {
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
   const [role,setRole] = useState('')
-  const [genre,setGenre] = useState('')
+  const [genre,setGenre] = useState('Male')
   
   // function handleOptionChange(event) {
   //   setSelectedOption(event.target.id);
