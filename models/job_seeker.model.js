@@ -1,7 +1,9 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
+
 const User = require("./user.model");
 const Candidats = require("./candidats.model");
+
 const Job_seeker = sequelize.define(
   "Job_seeker",
   {
@@ -21,21 +23,20 @@ const Job_seeker = sequelize.define(
     },
     majors: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull : true
+      allowNull: true,
     },
     pdfdata: {
-      type: DataTypes.BLOB('long'),
+      type: DataTypes.BLOB("long"),
       allowNull: true,
     },
     pdfName: {
-      type: DataTypes.STRING, 
-      allowNull:true,
-    },
-    pdfType:
-    {
       type: DataTypes.STRING,
       allowNull: true,
-    }
+    },
+    pdfType: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   { freezeTableName: true, timestamps: true }
 );

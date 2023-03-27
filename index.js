@@ -48,9 +48,12 @@ app.use(
   })
 );
 
+const { requires } = require("../middleware/role.middleware");
+const adminOnly = requires([ROLES.SUPERADMIN]);
+
 // app.use(upload.single("pdf"));
 // app.use(upload.single("pdf"));
-app.use("/api/superadmin", superadminroute);
+app.use("/api/superadmin", adminOnly, superadminroute);
 app.use("/api/admin", adminroutes);
 app.use("/api/profile", createprofile);
 app.use("/api/candidats", candidatRoute);

@@ -19,7 +19,7 @@ const getById = asyncHandler(async (req, res) => {
 });
 
 const register = asyncHandler(async (req, res) => {
-  const user = await service.register(req.body, req.file);
+  const user = await service.register(req.body);
   res.status(201).json(user);
 });
 
@@ -35,6 +35,7 @@ const deleteById = async (req, res) => {
 };
 
 const uploadPDF = asyncHandler(async (req, res) => {
+  console.log(req.user);
   const response = await service.uploadPDF(req.file, req.user);
   res.status(200).json(response);
 });

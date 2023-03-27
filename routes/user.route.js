@@ -15,7 +15,13 @@ router.post("/", controller.register);
 router.put("/:id", controller.updateById);
 router.delete("/:id", controller.deleteById);
 
-router.post("/upload", middlewareImg, controller.uploadImageyourself);
+router.post(
+  "/upload",
+  requires([ROLES.JOB_SEEKER, ROLES.ADMIN, ROLES.SUPERADMIN]),
+  middlewareImg,
+  controller.uploadImageyourself
+);
+
 router.post(
   "/uploadpdf",
   requires([ROLES.JOB_SEEKER, ROLES.ADMIN, ROLES.SUPERADMIN]),
