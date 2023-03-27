@@ -1,0 +1,37 @@
+GET http://localhost:3000/api/users
+
+###
+
+POST http://localhost:3000/api/users HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "admin",
+  "email": "admin2@local.com",
+  "password": "321Assdx",
+  "genre": "Other",
+  "age": 25,
+  "phoneNumber": "+1234567890",
+  "role": "recruiter",
+  "company": "EDreams"
+}
+
+###
+
+PUT http://localhost:3000/api/users/2 HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "adminae",
+  "email": "admins@local.com",
+  "password": "321Assdx",
+  "age": 25,
+  "phoneNumber": 321467890,
+  "role": "recruiter",
+  "company": "TheDreams"
+}
+
+
+###
+
+DELETE http://localhost:3000/api/users/3 HTTP/1.1

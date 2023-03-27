@@ -24,4 +24,18 @@ const pdfUpload = multer({
   },
 });
 
-module.exports ={imageUpload , pdfUpload}
+const fileStorage = multer.memoryStorage();
+const fileUpload = multer({
+  storage: fileStorage,
+  fileFilter: (_, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else if (file.mimetype === "application/pdf") {
+      cb(null, true);
+    } else {
+      cb(new Error("File type is not allowed"));
+    }
+  },
+});
+
+module.exports = { imageUpload, pdfUpload, fileUpload };
