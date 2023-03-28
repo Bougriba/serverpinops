@@ -17,7 +17,7 @@ router.delete("/:id", controller.deleteById);
 
 router.post(
   "/upload",
-  requires([ROLES.JOB_SEEKER, ROLES.ADMIN, ROLES.SUPERADMIN]),
+  requires([ROLES.JOB_SEEKER, ROLES.RECRUITER, ROLES.ADMIN, ROLES.SUPERADMIN]),
   middlewareImg,
   controller.uploadImageyourself
 );

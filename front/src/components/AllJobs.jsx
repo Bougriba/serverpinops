@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from 'react-router-dom';
+import { Buffer } from 'buffer';
+
 import '../index.css'
 function AllJobs(props) {
   console.log(props);
@@ -23,18 +25,29 @@ function AllJobs(props) {
   return (
     <>
       {jobs.map((e) => {
+        
+        const binaryData = e.User.imageData;
+      const buffer = Buffer.from(binaryData);
+      const base64ImageData = buffer.toString('base64');
+
+
         return (
           <div key={e.id} className="job-block">
           <Link to={{ pathname: `/Job/${e.id}`, state: { job: e } }}>
             
               <div className="job-title">{e.title}</div>
               <div className='img'>
-  
-    <img
-      src={`data:image/png;base64, ${e.imageData}`}
-      alt="user image"
-      style={{ width: "200px", height: "200px", objectFit: "cover" }}
-    />
+              {e.User.imageData || e.imageData === "" ? (
+              <img
+                src={`data:image/jpg;base64,${base64ImageData}`}
+                alt="user image"
+                style={{ width: "200px", height: "200px", objectFit: "cover" }}
+              />
+            ) : (
+              <div>No image available</div>
+            )}
+
+
 </div>
               <div className="job-details">
                 <div className="job-property">

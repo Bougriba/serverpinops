@@ -9,7 +9,7 @@ export default function GetAll() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('user');
-
+                console.log(token);
                 if (token) {
                     const decodedToken = jwt_decode(token);
                     const response = await Axios.get('http://localhost:8002/api/jobs/jobs/', {

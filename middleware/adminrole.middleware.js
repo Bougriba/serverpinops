@@ -12,7 +12,7 @@ const roleMiddleware = async (req, res, next) => {
   }
 
   try {
-    const decodedToken = jwt.verify(token, process.env.PASSWORD_HASH_TOKEN);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
     const role = decodedToken.role;
 

@@ -27,20 +27,22 @@ function Profile() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const [role,setRole] = useState('')
   
-  
-  //  Remaining -- > get all condidats / delete candidats for job_seeker
-  //  Recruiter --> jobs posted / delete job / create job / find all jobs / update. / get 7asb score.
+ 
+  //  Recruiter --> jobs posted / delete job / create job / find all jobs / update. /
   //  Admin -- > Verification , Crude on users 
   useEffect(() => {
     const token = localStorage.getItem('user');
     
     if (token) {
       const decodedToken = jwt_decode(token);
-      Axios.get(`http://localhost:8002/api/users/user/${decodedToken.userId}`)
+      // console.log('hello this is my decoded token' + JSON.stringify(decodedToken.userId))
+      Axios.get(`http://localhost:8002/api/users/${JSON.stringify(decodedToken.userId)}`)
         .then((response) => {
-          setUser(response.data.data);
-          console.log(user);
+          setUser(response.data);
+          console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
@@ -50,13 +52,20 @@ function Profile() {
   useEffect(() => {
     console.log(user)
   },[user])
+
+
+
+
   const handleSubmit = async (event) => {
+    setShowEmailInput(true);
     event.preventDefault();
     const token = localStorage.getItem('user');
     const decodedToken = jwt_decode(token);
+    
+    
     try {
-      const response = await Axios.put(`http://localhost:8002/api/users/${decodedToken.userId}`, { fullName, email, phoneNumber, });
-      console.log(response);
+      const response = await Axios.put(`http://localhost:8002/api/users/${decodedToken.userId}`, { fullName, email, phoneNumber });
+      console.log(decodedToken.userId);
     } catch (error) {
       console.log(error);
     }
@@ -209,10 +218,12 @@ try {
                     </MDBCol>
                     
                     <MDBCol sm="9">
-                    <MDBInput
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                    />
+                    {showEmailInput && (
+        <MDBInput
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      )}
                       <MDBCardText className="text-muted">{user.email}</MDBCardText>
                     </MDBCol>
                   </MDBRow>

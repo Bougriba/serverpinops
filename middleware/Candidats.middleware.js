@@ -12,7 +12,8 @@ const roleMiddleware = async (req, res, next) => {
   }
 
   try {
-    const decodedToken = jwt.verify(token, process.env.PASSWORD_HASH_TOKEN);
+    console.log(token);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
     const role = decodedToken.role;
 
@@ -28,7 +29,7 @@ const roleMiddleware = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "Unauthorized",
+      message: "Hello World",
     });
   }
 };

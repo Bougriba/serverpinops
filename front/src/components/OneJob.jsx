@@ -34,32 +34,32 @@ function OneJob() {
     return <div>Loading...</div>;
   }
   const jwtToken = localStorage.getItem('user');
-  const decodedToken = jwt_decode(jwtToken);
-  console.log(decodedToken);
-  console.log(jobid)
-  const Apply = async (event) => {
-    event.preventDefault();
-    const jwtToken = localStorage.getItem('user');
-    
-    
-    try {
-      const response = await Axios.post(
-        'http://localhost:8002/api/candidats/',
-        { job_id: jobid }, // job_id is the key and jobid is the value
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `${jwtToken}`,
-          },
-        }
-      );
-      alert('You Have Applied for this job')
-    } catch (error) {
-      console.error(error);
-    }
-  };
+console.log(jwtToken); // make sure jwtToken is not null
+
+const Apply = async (event) => {
+  event.preventDefault();
+
+  try {
+    const response = await Axios.post(
+      'http://localhost:8002/api/candidats/',
+      { job_id: jobid },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `${jwtToken}`,
+        },
+      }
+    );
+    console.log(response);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
   function handleFileChange(event) {
+    const jwtToken = localStorage.getItem('user');
+  
     const pdfFile = event.target.files[0];
     const formData = new FormData();
     formData.append('pdf', pdfFile);

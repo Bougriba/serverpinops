@@ -53,7 +53,7 @@ const getById = async (id) => {
       include: [],
     },
   });
-
+console.log(id);
   if (!user) {
     throw createError(404, `User not found with id ${id}`);
   }
@@ -62,45 +62,59 @@ const getById = async (id) => {
   return user;
 };
 
-const register = async (payload) => {
+const register = async (payload, file) => {
   payload = await yup.validateCreate(payload);
 
   const user = await User.findOne({ where: { email: payload.email } });
-  if (!!user) {
+  if (user) {
     throw createError(400, "User already exists");
   }
 
-  const defaultImage = fs.readFileSync("public/images/defaultimage.png");
-  payload.imageData = defaultImage;
-  payload.imageType = "image/png"; // Set the default image type
-  payload.imageName = "default.png"; // Set the default image name
+  if (file) {
+    const { mimetype, originalname, buffer } = file;
+    payload.imageData = buffer;
+    payload.imageType = mimetype;
+    payload.imageName = originalname;
+  } else {
+    const defaultImage = fs.readFileSync("public/images/defaultimage.png");
+    payload.imageData = defaultImage;
+    payload.imageType = "image/png"; // Set the default image type
+    payload.imageName = "default.png"; // Set the default image name
+  }
 
   // encrypt password
   const hashedPassword = bcrypt.hashSync(payload.password, 10);
-
-  const newUser = await User.create({
-    ...payload,
-    password: hashedPassword,
-  });
+  payload.password = hashedPassword;
 
   switch (payload.role) {
     case "recruiter":
-      await Recruiter.create({
-        idUser: newUser.id,
-        company: payload.company,
-      });
+      payload.Recruiter = { company: payload.company };
       break;
     case "job_seeker":
-      const seeker = await Job_seeker.create({
-        idUser: newUser.id,
+      payload.Job_seeker = {
         skills: payload.skills,
         degrees: payload.degrees,
         majors: payload.majors,
-      });
-      console.log(seeker);
+      };
+      break;
+    default:
       break;
   }
 
+  const newUser = await User.create(payload, {
+    include: [
+      {
+        model: Recruiter,
+        required: false,
+      },
+      {
+        model: Job_seeker,
+        required: false,
+      },
+    ],
+  });
+
+  delete newUser.password;
   return {
     id: newUser.id,
     message: `${newUser.fullName} is created`,
@@ -184,7 +198,7 @@ const uploadPDF = async (file, user) => {
 
   await userToUpdate.update(
     { pdfdata: buffer, pdfName: originalname, pdfType: mimetype },
-    { where: { id: user.userId } }
+    { where: { idUser: user.userId } }
   );
 
   return {
@@ -194,6 +208,7 @@ const uploadPDF = async (file, user) => {
 
 const uploadImageyourself = async (file, user) => {
   const { mimetype, originalname, buffer } = file;
+  
 
   const userToUpdate = await User.findOne({
     where: { id: user.userId },

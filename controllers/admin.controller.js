@@ -573,6 +573,7 @@ console.log(idUser)
 };
 module.exports.verifier = async (req, res) => {
   const id = req.params.id;
+  console.log(id);
   try {
     const job = job_offer.findOne({ where: { id } });
     if (!job)

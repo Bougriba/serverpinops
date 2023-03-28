@@ -6,17 +6,20 @@ const CreateJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
     const idUser = req.user.userId;
-    //console.log(req.user);
+    
     const { title, job_description, location, salary, tags } = req.body;
-    console.log(job_description)
+
+    // Convert tags to an array if it's not already one
+    const tagsArray = Array.isArray(tags) ? tags : [tags];
+
     // Create new job with recruiter id
     const job = await job_offer.create({
       idUser: idUser,
       title,
-      job_description: job_description,
+      job_description,
       location,
       salary,
-      tags,
+      tags: tagsArray, // Use the converted tags array
       verified : false ,
     });
 
@@ -30,6 +33,7 @@ const CreateJob = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 const getAllJobs = async (req, res) => {
   try {
     // Get recruiter id from authenticated user

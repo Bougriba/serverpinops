@@ -5,6 +5,7 @@ const roleMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
+
     return res.status(401).json({
       success: false,
       message: "Unauthorized",
@@ -12,7 +13,7 @@ const roleMiddleware = async (req, res, next) => {
   }
 
   try {
-    const decodedToken = jwt.verify(token, process.env.PASSWORD_HASH_TOKEN);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
     const role = decodedToken.role;
 
@@ -28,7 +29,7 @@ const roleMiddleware = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "Unauthorized",
+      message: "Test Test",
     });
   }
 };
