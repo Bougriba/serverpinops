@@ -15,7 +15,7 @@ const roleMiddleware = async (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
     const role = decodedToken.role;
-
+    console.log(role);
     //if (role !== 'admin' && role !== 'superadmin' && role !== 'recruiter') {
     if (role !== 'admin' && role !== 'superadmin') {
       return res.status(403).json({

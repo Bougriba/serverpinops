@@ -9,6 +9,7 @@ import Navbar from './components/Navbar'
 import Profile from './components/Profile'
 import MyJobs from './components/MyJobs.jsx';
 import Recruiter from './components/Recruiter.jsx';
+import AdminDashboard from './components/AdminDashboard.jsx';
 function App() {
   const [jobs, setJobs] = useState([]);
   
@@ -33,6 +34,7 @@ function App() {
         <Route path="/Profile" element={<Profile />} />
         <Route path="/MyJobs" element={<MyJobs />} />
         <Route path="/Recruiter" element={<Recruiter />} />
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
         
         
       </Routes>

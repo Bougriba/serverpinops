@@ -12,7 +12,7 @@ function Recruiter() {
   const [jobs, setJobs] = useState([]);
   const [error, setError] = useState("");
   const [showUpdateForm, setShowUpdateForm] = useState(false);
-const [updatedJob, setUpdatedJob] = useState({
+  const [updatedJob, setUpdatedJob] = useState({
   title: "",
   location: "",
   salary: "",
@@ -37,7 +37,7 @@ const [updatedJob, setUpdatedJob] = useState({
             }
         } catch (error) {
             console.error(error);
-        }
+          }
     };
 
     fetchData();

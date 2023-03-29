@@ -573,15 +573,19 @@ console.log(idUser)
 };
 module.exports.verifier = async (req, res) => {
   const id = req.params.id;
-  console.log(id);
+  console.log('id:', id);
   try {
-    const job = job_offer.findOne({ where: { id } });
-    if (!job)
-      res.status(400).json({
+    const job = await job_offer.findOne({ where: { id } });
+    console.log('job:', job);
+    if (!job) {
+      console.log('Job not found');
+      return res.status(400).json({
         message: "Not Found",
       });
+    }
 
     await job_offer.update({ verified: true }, { where: { id: id } });
+    console.log('Job verified:', job);
     return res.status(200).json({
       success: true,
       message: "Job Verified",
