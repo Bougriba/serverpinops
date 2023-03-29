@@ -9,7 +9,7 @@ const authMiddleware = require("../middleware/auth.middleware");
 const jobroleMiddleware = require("../middleware/jobrole.middleware");
 
 
-Router.post("/", authMiddleware, jobroleMiddleware, CreateJob);
+Router.post("/jobs", authMiddleware, jobroleMiddleware, CreateJob);
 Router.get("/", getAlldataJobs);
 Router.get("/jobOffers/:tag", gettalljobbytag);
 Router.get("/jobs",authMiddleware,jobroleMiddleware, getAllJobs);

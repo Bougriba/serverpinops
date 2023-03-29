@@ -6,12 +6,6 @@ const Candidats = require("./candidats.model");
 const job_offer = sequelize.define(
   "job_offer",
   {
-    // id: {
-    // type: DataTypes.INTEGER,
-    // allowNull: false,
-    // primaryKey: true,
-    // autoIncrement : true
-    // },
     idUser: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -36,16 +30,17 @@ const job_offer = sequelize.define(
     tags: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
+      defaultValue: [],
     },
-    verified:
-    {
+    verified: {
       type: DataTypes.BOOLEAN,
-      allowNull : true,
-      defaultvalue : false ,
-    }
+      allowNull: true,
+      defaultValue: false,
+    },
   },
   { freezeTableName: true, timestamps: true }
 );
+
 
 job_offer.hasMany(Candidats, { foreignKey: "idJob" });
 Candidats.belongsTo(job_offer, { foreignKey: "idJob" });

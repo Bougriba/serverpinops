@@ -100,8 +100,10 @@ const updateJob = async (req, res) => {
       return res.status(404).json({ message: "Job not found" });
     }
 
+    const updateTags = Array.isArray(tags) ? tags : tags ? Array.from(tags) : null;
+
     const updatejob = await job_offer.update(
-      { location, title, skills, degrees, majors, salary, tags },
+      { location, title, skills, degrees, majors, salary, tags: updateTags },
       { where: { id: req.params.id } }
     );
 
@@ -115,6 +117,7 @@ const updateJob = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 const deleteJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
