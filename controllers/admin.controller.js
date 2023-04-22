@@ -32,7 +32,7 @@ module.exports.uploadImage = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message:"azerazerazer",
+      message: "azerazerazer",
     });
   }
 };
@@ -139,12 +139,13 @@ module.exports.createUser = async (req, res) => {
 
 module.exports.getUsers = async (req, res) => {
   try {
-    const users = await User.findAll({
-      // include: {
-      //   model: Recruiter,
-      //   //attributes: { exclude: ["idUser"] },
-      //   attributes : ['company'],
-      // }
+    const pageSize = 10;
+    const pageNumber = Number(req.query.pageNumber) || 1;
+
+    const { count, rows: users } = await User.findAndCountAll({
+      offset: (pageNumber - 1) * pageSize,
+      limit: pageSize,
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: Recruiter,
@@ -162,6 +163,7 @@ module.exports.getUsers = async (req, res) => {
         raw: true,
       },
     });
+
     const modifiedUsers = users.map((user) => {
       const newUser = { ...user.toJSON() };
       if (!newUser.Recruiter) {
@@ -184,9 +186,14 @@ module.exports.getUsers = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: modifiedUsers,
+      pageNumber,
+      pageSize,
+      totalPages: Math.ceil(count / pageSize),
+      totalRecords: count,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       success: false,
       errorMessage: error.message,
     });
@@ -279,6 +286,32 @@ module.exports.deleteUser = async (req, res) => {
   }
 };
 
+module.exports.checkemail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ where: { email } })
+    if (user)
+    {
+      return res.status(200).json({
+        success: true,  
+      });
+    }
+    else
+    {
+      return res.status(400).json({
+        success: false, 
+        message:"email already in use"
+      });
+      }
+  } catch (error)
+  {
+    res.status(500).json({
+      success: false, 
+      errorMessage:error.message
+    })  
+  }
+}
+
 module.exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -289,24 +322,15 @@ module.exports.updateUser = async (req, res) => {
       age,
       phoneNumber,
       role,
-      company,
-      skills,
-      degrees,
-      majors,
-      genre, 
+      genre,
     } = req.body;
     let imageData, imageType, imageName;
-    if (req.file) {
-      const { mimetype, originalname, buffer } = req.file;
-      imageData = buffer;
-      imageType = mimetype;
-      imageName = originalname;
-    } else {
-      const defaultImage = fs.readFileSync("public/images/defaultimage.png");
-      imageData = defaultImage;
-      imageType = "image/png"; // Set the default image type
-      imageName = "default.png"; // Set the default image name
-    }
+  if (req.file) {
+    const { mimetype, originalname, buffer } = req.file;
+    imageData = buffer;
+    imageType = mimetype;
+    imageName = originalname;
+  }
     const user = await User.findOne({
       where: { id },
       include: [
@@ -326,77 +350,26 @@ module.exports.updateUser = async (req, res) => {
         .status(404)
         .json({ success: false, errorMessage: "User not found" });
     }
-    if (user.role == "admin" || user.role === "superadmin") {
-      return res.status(400).json({
-        success: false,
-        errorMessage: "YOU DO NOT HAVE THE PRIVILIGE",
-      });
-    }
     let updatedUser
-    if (password != null) {
+    if (password)
+    {
       const genSalt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, genSalt);
-     updatedUser = await user.update(
-        {
-          fullName,
-          password: hashedPassword,
-          age,
-          phoneNumber,
-          email,
-          imageData,
-          imageType,
-          imageName,
-          genre,
-        },
-        { where: { id:id} }
+       updatedUser = await user.update(
+        { fullName, password:hashedPassword, age, phoneNumber, email , role,genre },
+        { where: { id} }
       );
     }
     else
     {
       updatedUser = await user.update(
-        {
-          fullName,
-          age,
-          phoneNumber,
-          email,
-          imageData,
-          imageType,
-          imageName,
-          genre,
-        },
-        { where: { id:id} }
+        { fullName, age, phoneNumber, email , role,genre },
+        { where: { id} }
       );
-    }
+      }
   
-   
-
-    if (updatedUser.Recruiter) {
-      await updatedUser.Recruiter.update({ company: company });
-    } else if (updatedUser.Job_seeker) {
-      await updatedUser.Job_seeker.update({
-        skills: skills,
-        degrees: degrees,
-        majors: majors,
-      });
-    }
-    const modifiedUser = { ...updatedUser.toJSON() };
-    if (!modifiedUser.Recruiter) {
-      delete modifiedUser.Recruiter;
-    } else if (!modifiedUser.Recruiter.company) {
-      delete modifiedUser.Recruiter.company;
-    }
-    if (!modifiedUser.Job_seeker) {
-      delete modifiedUser.Job_seeker;
-    } else if (!modifiedUser.Job_seeker.pdf) {
-      delete modifiedUser.Job_seeker.pdf;
-    }
-    delete modifiedUser["Recruiter.idUser"];
-    delete modifiedUser["Job_seeker.idUser"];
-
     return res.status(200).json({
       success: true,
-      data: modifiedUser,
-      message:"User Updated Suces"
     });
   } catch (error) {
     res.status(500).json({
@@ -413,7 +386,7 @@ module.exports.getAllJobsbyRecuriter = async (req, res) => {
     //console.log(req.user);
     // Find all jobs for recruiter id
     const jobs = await job_offer.findAll({
-      where: { idUser:id },
+      where: { idUser: id },
     });
 
     res.status(200).json({
@@ -428,13 +401,22 @@ module.exports.getAllJobsbyRecuriter = async (req, res) => {
 };
 module.exports.getAlldataJobs = async (req, res) => {
   try {
-    // Find all jobs for recruiter id
-    const jobs = await job_offer.findAll();
+    const pageSize = 5;
+    const pageNumber = Number(req.query.pageNumber) || 1
+  
+    const { count, rows: jobs } = await job_offer.findAndCountAll({
+      offset: (pageNumber - 1) * pageSize,
+      limit: pageSize,
+      order: [["createdAt", "DESC"]],
+    });
 
     res.status(200).json({
       success: true,
-      message: "Working Successfully",
       data: jobs,
+      pageNumber,
+      pageSize,
+      totalPages: Math.ceil(count / pageSize),
+      totalRecords: count
     });
   } catch (err) {
     console.error(err);
@@ -445,8 +427,6 @@ module.exports.getAlldataJobs = async (req, res) => {
 module.exports.deleteJobbyRecruiter = async (req, res) => {
   try {
     const idjob = req.params.Job_id;
-
-    // Find job by id and recruiter id
     const job = await job_offer.findOne({
       where: { id: idjob },
     });
@@ -459,7 +439,7 @@ module.exports.deleteJobbyRecruiter = async (req, res) => {
     await job.destroy();
     res.status(204).json({
       message: "Job deleted",
-      success:true ,
+      success: true,
     });
   } catch (err) {
     console.error(err);
@@ -500,17 +480,16 @@ module.exports.updateJobbyRecruiter = async (req, res) => {
 
 module.exports.getCandidatById = async (req, res) => {
   try {
-    idJob= req.params.Job_id;
-    idUser= req.params.userId;
+    idJob = req.params.Job_id;
+    idUser = req.params.userId;
     const candidat = await Candidats.findOne({
       where: {
-        idJob:idJob,
-        idUser:idUser,
+        idJob: idJob,
+        idUser: idUser,
       },
       include: [job_offer],
     });
-    
-    
+
     if (!candidat) {
       return res.status(404).json({ message: "Candidat not found" });
     }
@@ -551,9 +530,9 @@ module.exports.getAllCandidats = async (req, res) => {
 
 module.exports.deleteCandidat = async (req, res) => {
   try {
-    idUser= req.params.userId;
+    idUser = req.params.userId;
     const job_id = req.params.Job_id;
-console.log(idUser)
+    console.log(idUser);
     // Check if candidate exists
     const existingCandidate = await Candidats.findOne({
       where: { idJob: job_id, idUser: idUser },
@@ -571,6 +550,8 @@ console.log(idUser)
     return res.status(500).json({ message: error.message });
   }
 };
+
+
 module.exports.verifier = async (req, res) => {
   const id = req.params.id;
   try {
@@ -587,6 +568,9 @@ module.exports.verifier = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      success: false,
+      errorMessage: error.message,
+    });
   }
 };

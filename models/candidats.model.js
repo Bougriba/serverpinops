@@ -17,7 +17,20 @@ const Candidats = sequelize.define(
     allowNull: false,
     primaryKey:true ,
     onDelete: 'CASCADE',
+      },
+      Score: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      interviewDate: {
+        type: DataTypes.DATE,
+        require: false ,
     },
+    applicationStatus: {
+        type: DataTypes.ENUM('pending', 'accepted', 'rejected'),
+      default: 'pending',
+        require: false,
+    }
     
     
 },

@@ -1,13 +1,15 @@
 const Recruiter = require("../models/recruiter.model");
 const job_offer = require("../models/job_offers.model");
+const user=require('../models/user.model')
 const { Op } = require("sequelize");
+const { Sequelize } = require('sequelize');
 const CreateJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
     const idUser = req.user.userId;
     //console.log(req.user);
-    const { title, job_description, location, salary, tags } = req.body;
-    console.log(job_description)
+    const { title, job_description, location, salary, tags,company } = req.body;
+    console.log(job_description);
     // Create new job with recruiter id
     const job = await job_offer.create({
       idUser: idUser,
@@ -16,7 +18,8 @@ const CreateJob = async (req, res) => {
       location,
       salary,
       tags,
-      verified : false ,
+      company,
+      verified: false,
     });
 
     res.status(201).json({
@@ -31,18 +34,26 @@ const CreateJob = async (req, res) => {
 };
 const getAllJobs = async (req, res) => {
   try {
+    const pageSize = 10;
+    const pageNumber = Number(req.query.pageNumber) || 1;
     // Get recruiter id from authenticated user
     const idUser = req.user.userId;
-    
+
     // Find all jobs for recruiter id
-    const jobs = await job_offer.findAll({
+    const  jobs  = await job_offer.findAndCountAll({
+      offset: (pageNumber - 1) * pageSize,
+      limit: pageSize,
+      order: [["createdAt", "DESC"]],
       where: { idUser: idUser },
     });
 
     res.status(200).json({
       success: true,
-      message: "Working Successfully",
-      data: jobs,
+      message: "Working",
+      data: jobs.rows,
+      pageNumber,
+      totalPages: Math.ceil(jobs.count / pageSize),
+      count: jobs.count,
     });
   } catch (err) {
     console.error(err);
@@ -51,12 +62,9 @@ const getAllJobs = async (req, res) => {
 };
 const getJobById = async (req, res) => {
   try {
-    // Get recruiter id from authenticated user
-    const idUser = req.user.userId;
-
     // Find job by id and recruiter id
     const job = await job_offer.findOne({
-      where: { id: req.params.id, idUser: idUser },
+      where: { id: req.params.id },
     });
 
     if (!job) {
@@ -65,8 +73,8 @@ const getJobById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message :"ALL godd",
-      data:job,
+      message: "Job Getted successfully",
+      data: job,
     });
   } catch (err) {
     console.error(err);
@@ -77,10 +85,9 @@ const updateJob = async (req, res) => {
   try {
     // Get recruiter id from authenticated user
     const idUser = req.user.userId;
-    const { location, title, skills, degrees, majors, salary, tags } = req.body;
-    // Find job by id and recruiter id
+    const { title, job_description, location, salary, tags,company } = req.body;    
     const job = await job_offer.findOne({
-      where: { id: req.params.id, idUser: idUser },
+      where: { id: req.params.id},
     });
 
     if (!job) {
@@ -88,7 +95,7 @@ const updateJob = async (req, res) => {
     }
 
     const updatejob = await job_offer.update(
-      { location, title, skills, degrees, majors, salary, tags },
+      { title, job_description, location, salary, tags,company  },
       { where: { id: req.params.id } }
     );
 
@@ -127,16 +134,26 @@ const deleteJob = async (req, res) => {
 
 const getAlldataJobs = async (req, res) => {
   try {
-  
-    // Find all jobs for recruiter id
-    const jobs = await job_offer.findAll(
+    const pageSize = Number(req.query.pageSize) || 10;
+    const pageNumber = Number(req.query.pageNumber) || 1;
+    // Get recruiter id from authenticated user
+    
 
-      {where :{verified : true}});
+    // Find all jobs for recruiter id
+    const  jobs  = await job_offer.findAndCountAll({
+      offset: (pageNumber - 1) * pageSize,
+      limit: pageSize,
+      order: [["createdAt", "DESC"]],
+    });
 
     res.status(200).json({
       success: true,
-      message: "Working Successfully",
-      data: jobs,
+      message: "Working",
+      data: jobs.rows,
+      pageSize,
+      pageNumber,
+      totalPages: Math.ceil(jobs.count / pageSize),
+      count: jobs.count,
     });
   } catch (err) {
     console.error(err);
@@ -152,20 +169,94 @@ const gettalljobbytag = async (req, res) => {
         tags: {
           [Op.contains]: [tag],
         },
-        verified : true ,
+        verified: true,
       },
     });
     res.status(200).json({
-      success: true, 
+      success: true,
       message: "Working successfully",
-      data : jobOffers,
-    })
+      data: jobOffers,
+    });
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: error.message })
-  };
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
+const showJobs = async (req, res, next) => {
+  try {
+    // Enable search
+    const keyword = req.query.keyword ? {
+      title: {
+        [Op.iLike]: `%${req.query.keyword}%`
+      }
+    } : {};
+
+    // Filter jobs by tag
+    const tag = req.query.tag;
+    const tagFilter = tag ? {
+      tags: {
+        [Op.contains]: [tag],
+      }
+    } : {};
+
+    const location = req.query.location;
+    const locationFilter = location ? {
+      location: {
+        [Op.iLike]: `%${location}%`
+      }
+    } : {};
+    // Retrieve distinct tags
+    const distinctTags = await job_offer.findAll({
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('tags')), 'tags']
+      ]
+    });
+    
+    // Map result to an array of tag values
+    const Atags = distinctTags.map(tag => tag.tags).flat()
+    const uniquetags = [...new Set(Atags)]
+    
+    const distinctlocation = await job_offer.findAll({
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('location')), 'location']
+      ]
+    });
+    const Alocation = distinctlocation.map(location => location.location).flat()
+    const uniquelocation = [...new Set(Alocation)]
+    
+    // Pagination
+    const pageSize = 5;
+    const pageNumber = Number(req.query.pageNumber) || 1;
+
+    // Query jobs with both keyword and tag filters
+    const jobs = await job_offer.findAndCountAll({
+      where: {
+        verified: true,
+        ...keyword,
+        ...tagFilter,
+        ...locationFilter
+      },
+      limit: pageSize,
+      offset: (pageNumber - 1) * pageSize
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Working successfully",
+      data: jobs.rows,
+      pageNumber,
+      totalPages: Math.ceil(jobs.count / pageSize),
+      count: jobs.count,
+      uniquetags,
+      uniquelocation,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 module.exports = {
@@ -176,4 +267,5 @@ module.exports = {
   getJobById,
   getAlldataJobs,
   gettalljobbytag,
+  showJobs,
 };

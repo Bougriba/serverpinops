@@ -5,6 +5,7 @@ const {
     getCandidatById,
     getAllCandidats,
     deleteCandidat,
+    getAllCandidatsforRecruiter,
     // updateJob,
     //deleteJob,
     // getAllJobs,
@@ -14,10 +15,11 @@ const authMiddleware = require("../middleware/auth.middleware");
 const candidatsMiddleware = require("../middleware/Candidats.middleware");
 
 
-Router.post("/", authMiddleware, candidatsMiddleware, createCandidat);
+Router.post("/:job_id", authMiddleware, candidatsMiddleware, createCandidat);
 
 Router.get("/:id", authMiddleware, candidatsMiddleware, getCandidatById);
 Router.get('/', authMiddleware, candidatsMiddleware, getAllCandidats);
+Router.get('/score', authMiddleware, candidatsMiddleware, getAllCandidatsforRecruiter);
 Router.delete('/:id', authMiddleware, candidatsMiddleware, deleteCandidat);
 // Router.get("/:id",authMiddleware,jobroleMiddleware, getJobById); //req.params.id
 // Router.delete("/:id",authMiddleware , candidatsMiddleware, deleteJob);

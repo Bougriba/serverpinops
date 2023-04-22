@@ -11,10 +11,6 @@ const Recruiter = sequelize.define(
       onDelete: "CASCADE",
       primaryKey: true,
     },
-    company: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
   },
   { freezeTableName: true, timestamps: true }
 );

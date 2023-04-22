@@ -2,7 +2,8 @@ const User = require("../models/user.model");
 const Recruiter = require("../models/recruiter.model");
 const Job_seeker = require("../models/job_seeker.model");
 const bcrypt = require("bcrypt");
-const fs = require('fs');
+const fs = require("fs");
+const CircularJSON = require("circular-json");
 module.exports.uploadImageyourself = async (req, res) => {
   try {
     console.log(req.user.userId);
@@ -13,7 +14,7 @@ module.exports.uploadImageyourself = async (req, res) => {
 
     if (!user) {
       return res
-        
+
         .status(404)
         .json({ success: false, errorMessage: "User not found" });
     }
@@ -49,13 +50,13 @@ module.exports.uploadPdf = async (req, res) => {
 
     if (!user) {
       return res
-        
+
         .status(404)
         .json({ success: false, errorMessage: "User not found" });
     }
 
     const updatejobseeker = await user.update(
-      { pdfdata: buffer , pdfName:originalname , pdfType:mimetype},
+      { pdfdata: buffer, pdfName: originalname, pdfType: mimetype },
       { where: { idUser: req.user.userId } }
     );
 
@@ -72,120 +73,110 @@ module.exports.uploadPdf = async (req, res) => {
 };
 
 module.exports.createUser = async (req, res) => {
-  const {
-    fullName,
-    email,
-    password,
-    age,
-    phoneNumber,
-    role,
-    company,
-    skills,
-    degrees,
-    majors,
-    genre,
-  } = req.body;
-  
-  let imageData, imageType, imageName;
-  if (req.file) {
-    const { mimetype, originalname, buffer } = req.file;
-    imageData = buffer;
-    imageType = mimetype;
-    imageName = originalname;
-  } else {
-    const defaultImage = fs.readFileSync("public/images/defaultimage.png");
-    imageData = defaultImage;
-    imageType = "image/png"; // Set the default image type
-    imageName = "default.png"; // Set the default image name
-  }
-  
   try {
-    const user = await User.findOne({ where: { email } });
-
-    if (user) {
-      return res.status(400).send("Cannot create an account with same email");
+    const { fullName, email, password, age, phoneNumber, role, genre } =
+      req.body;
+    let imageData, imageType, imageName;
+    if (req.file) {
+      const { mimetype, originalname, buffer } = req.file;
+      imageData = buffer;
+      imageType = mimetype;
+      imageName = originalname;
+    } else {
+      const defaultImage = fs.readFileSync("public/images/defaultimage.png");
+      imageData = defaultImage;
+      imageType = "image/png"; // Set the default image type
+      imageName = "default.png"; // Set the default image name
     }
 
-    let newUser;
+    const userExists = await User.findOne({ where: { email } });
+    if (userExists) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already in use",
+      });
+    }
+
     const genSalt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, genSalt);
-    if (role == "recruiter") {
-      newUser = await User.create(
+    let user;
+
+    if (role === "recruiter") {
+      user = await User.create(
         {
           fullName,
           email,
           password: hashedPassword,
           age,
           phoneNumber,
-          imageData, imageType, imageName,
           role,
           genre,
-          Recruiter: {
-            company,
-          },
+          imageData,
+          imageType,
+          imageName,
+          Recruiter: {},
         },
         {
           include: [Recruiter],
         }
       );
-    } else if (role == "job_seeker") {
-      newUser = await User.create(
+    } else if (role === "job_seeker") {
+      user = await User.create(
         {
           fullName,
           email,
           password: hashedPassword,
           age,
           phoneNumber,
-          imageData, imageType, imageName,
           role,
           genre,
-          Job_seeker: {
-            skills: skills,
-            degrees: degrees,
-            majors: majors,
-          },
+          imageData,
+          imageType,
+          imageName,
+          Job_seeker: {},
         },
         {
           include: [Job_seeker],
         }
       );
     } else {
-      newUser = await User.create({
+      user = await User.create({
         fullName,
         email,
         password: hashedPassword,
         age,
         phoneNumber,
-        imageData, imageType, imageName,
+        imageData,
+        imageType,
+        imageName,
         role,
-        genre
+        genre,
       });
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: `${newUser.fullName} is created`,
+      message: "Successfully registered",
+      data: user,
     });
-  } catch (err) {
-    res.status(500).json({
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      errorMessage: err.message,
+      errorMessage: error.message,
     });
   }
 };
 
 module.exports.getUsers = async (req, res) => {
   try {
-    const users = await User.findAll({
-      // include: {
-      //   model: Recruiter,
-      //   //attributes: { exclude: ["idUser"] },
-      //   attributes : ['company'],
-      // }
+    const pageSize = Number(req.query.pageSize) || 10;
+    const pageNumber = Number(req.query.pageNumber) || 1;
+    const { count, rows: users } = await User.findAndCountAll({
+      limit: pageSize,
+      offset: (pageNumber - 1) * pageSize,
       include: [
         {
           model: Recruiter,
-          attributes: ["company"],
           required: false,
         },
         {
@@ -195,10 +186,11 @@ module.exports.getUsers = async (req, res) => {
         },
       ],
       attributes: {
-        exclude: ["password"],
+        exclude: ["password", "imageData", "imageName", "imageType"],
         raw: true,
       },
     });
+
     const modifiedUsers = users.map((user) => {
       const newUser = { ...user.toJSON() };
       if (!newUser.Recruiter) {
@@ -213,17 +205,20 @@ module.exports.getUsers = async (req, res) => {
       }
       delete newUser["Recruiter.idUser"];
       delete newUser["Job_seeker.idUser"];
-      const image = newUser.imageData.toString("base64");
-      newUser.imageData = image;
       return newUser;
     });
 
     return res.status(200).json({
       success: true,
       data: modifiedUsers,
+      pageNumber,
+      pageSize,
+      totalPages: Math.ceil(count / pageSize),
+      totalRecords: count,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       success: false,
       errorMessage: error.message,
     });
@@ -231,15 +226,12 @@ module.exports.getUsers = async (req, res) => {
 };
 
 module.exports.getUser = async (req, res) => {
-  const { id } = req.params;
-
   try {
     const user = await User.findOne({
-      where: { id },
+      where: { id: req.user.userId },
       include: [
         {
           model: Recruiter,
-          attributes: ["company"],
           required: false,
         },
         {
@@ -248,7 +240,7 @@ module.exports.getUser = async (req, res) => {
           required: false,
         },
       ],
-      attributes: { exclude: ["password"], raw: true },
+      attributes: { exclude: ["password", "imageData"], raw: true },
     });
 
     if (!user) {
@@ -271,11 +263,51 @@ module.exports.getUser = async (req, res) => {
     }
     delete modifiedUser["Recruiter.idUser"];
     delete modifiedUser["Job_seeker.idUser"];
-    const image = modifiedUser.imageData.toString("base64");
-    modifiedUser.imageData = image;
+
     return res.status(200).json({
       success: true,
       data: modifiedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      errorMessage: "Server error",
+    });
+  }
+};
+
+module.exports.getUserbyid = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findOne({
+      where: { id },
+      include: [
+        {
+          model: Recruiter,
+          required: false,
+        },
+        {
+          model: Job_seeker,
+          attributes: ["skills", "degrees", "majors"],
+          required: false,
+        },
+      ],
+      attributes: { exclude: ["password"], raw: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        errorMessage: `User not found with id`,
+      });
+    }
+
+   
+    return res.status(200).json({
+      success: true,
+      data:user,
     });
   } catch (error) {
     console.error(error);
@@ -310,7 +342,27 @@ module.exports.deleteUser = async (req, res) => {
     });
   }
 };
-
+module.exports.checkemail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (user) {
+      return res.status(400).json({
+        success: false,
+        message:"email already in use"
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      errorMessage: error.message,
+    });
+  }
+};
 module.exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -321,10 +373,6 @@ module.exports.updateUser = async (req, res) => {
       age,
       phoneNumber,
       role,
-      company,
-      skills,
-      degrees,
-      majors,
       genre,
     } = req.body;
     let imageData, imageType, imageName;
@@ -353,55 +401,41 @@ module.exports.updateUser = async (req, res) => {
         .status(404)
         .json({ success: false, errorMessage: "User not found" });
     }
-    let updatedUser;
-    if (password != null) {
-      const genSalt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, genSalt);
-       updatedUser = await user.update(
-        { fullName, password: hashedPassword, age, phoneNumber, email, imageData, imageType, imageName, genre:genre },
-        { where: { id:id } }
-      );
-    }
-    else
-    {
-       updatedUser = await user.update(
-        { fullName, age, phoneNumber, email, imageData, imageType, imageName, genre:genre },
-        { where: { id:id } }
-      );
-      }
-    
-
-    if (updatedUser.Recruiter) {
-      await updatedUser.Recruiter.update({ company: company });
-    } else if (updatedUser.Job_seeker) {
-      await updatedUser.Job_seeker.update({
-        skills: skills,
-        degrees: degrees,
-        majors: majors,
-      });
-    }
-
-    const modifiedUser = { ...updatedUser.toJSON() };
-    if (!modifiedUser.Recruiter) {
-      delete modifiedUser.Recruiter;
-    } else if (!modifiedUser.Recruiter.company) {
-      delete modifiedUser.Recruiter.company;
-    }
-    if (!modifiedUser.Job_seeker) {
-      delete modifiedUser.Job_seeker;
-    } else if (!modifiedUser.Job_seeker.pdf) {
-      delete modifiedUser.Job_seeker.pdf;
-    }
-    delete modifiedUser["Recruiter.idUser"];
-    delete modifiedUser["Job_seeker.idUser"];
+    const genSalt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, genSalt);
+    const updatedUser = await user.update(
+      { fullName, password:hashedPassword, age, phoneNumber, email , role,genre },
+      { where: { id} }
+    );
     return res.status(200).json({
       success: true,
-      data: modifiedUser,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       errorMessage: error.message,
+    });
+  }
+};
+
+module.exports.UserProfile = async (req, res) => {
+  const id = req.user.userId;
+  try {
+    const user = await User.findOne({ where: { id } });
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "Bad request",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    res.status(403).json({
+      success: false,
+      message: error.message,
     });
   }
 };

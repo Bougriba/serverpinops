@@ -15,6 +15,7 @@ const {
   getAllCandidats,
   getAllCandidatsbyApplier,
   getCandidatById,
+  checkemail
 } = require("../controllers/admin.controller");
 const { uploadImageyourself } = require("../controllers/user.controller")
 const { imageUpload, pdfUpload } = require("../middleware/filestorage.middleware")
@@ -33,7 +34,7 @@ Router.get("/job/jobs", authMiddleware, adminroleMiddleware, getAlldataJobs)
 Router.delete("/jobid/:Job_id", authMiddleware, adminroleMiddleware, deleteJobbyRecruiter);
 Router.put("/jobid/:Job_id", authMiddleware, adminroleMiddleware, updateJobbyRecruiter);
 Router.put("/verifier/:id", authMiddleware, adminroleMiddleware, verifier);
-
+Router.post("/check",checkemail)
 Router.delete("/candidat/:userId/jobid/:Job_id", authMiddleware, adminroleMiddleware, deleteCandidat);
 Router.get("/Can/Candidats", authMiddleware, adminroleMiddleware, getAllCandidats);
 Router.get("/candidat/:userId/", authMiddleware, adminroleMiddleware, getAllCandidatsbyApplier);

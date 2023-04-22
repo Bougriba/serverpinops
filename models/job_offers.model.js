@@ -37,6 +37,10 @@ const job_offer = sequelize.define(
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
     },
+    company: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     verified:
     {
       type: DataTypes.BOOLEAN,
